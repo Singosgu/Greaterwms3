@@ -27,11 +27,11 @@ jobs:
         pip install nuitka
         pip install -r requirements.txt
 
-    - name: Set Django Settings
-      shell: bash # 明确指定使用 Bash
+    - name: Set Django Settings for GitHub Actions
       run: |
-        export DJANGO_SETTINGS_MODULE=bomiot.server.server.settings
-        export RUN_MAIN=true
+        echo "DJANGO_SETTINGS_MODULE=bomiot.server.server.settings" >> $env:GITHUB_ENV
+        echo "RUN_MAIN=true" >> $env:GITHUB_ENV
+      shell: pwsh # 使用 pwsh (PowerShell) 是在 Windows 上最原生和可靠的方式
 
     - name: Create dummy files for Nuitka to include
       run: |
@@ -39,6 +39,12 @@ jobs:
         touch setup.ini
         touch logo.ico
       shell: pwsh
+          
+    - name: Run Nuitka build
+      # 执行你的 build.py 脚本来启动 Nuitka 打包过程
+      run: python build.py
+      env:
+        PYTHONIOENCODING: utf-8
         
     - name: Run Nuitka build
       # 执行你的 build.py 脚本来启动 Nuitka 打包过程
