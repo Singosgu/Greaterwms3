@@ -1,0 +1,49 @@
+name: Nuitka Build
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-executable:
+    # 因为你的项目是为 Windows 打包，所以需要使用 Windows 环境
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      # 检出你的仓库代码
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      # 设置 Python 环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+        
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka
+        # 根据你 build.py 中包含的包，你需要一个 requirements.txt 文件来安装所有依赖
+        # 请确保你的项目中包含这个文件
+        pip install -r requirements.txt
+
+    - name: Create dummy files for Nuitka to include
+      # Nuitka 需要在打包时找到 --include-data-dir 和 --include-data-file 指定的目录和文件
+      # 此步骤是为了确保即使仓库中不存在这些文件，构建也能成功
+      run: |
+        mkdir -p dbs logs main
+        touch setup.ini
+        touch logo.ico
+        
+    - name: Run Nuitka build
+      # 执行你的 build.py 脚本来启动 Nuitka 打包过程
+      run: python build.py
+
+    - name: Upload executable
+      # 将生成的 .exe 文件作为构建产物上传，方便下载
+      uses: actions/upload-artifact@v3
+      with:
+        name: bomiot-exe
+        path: dist/bomiot.exe
