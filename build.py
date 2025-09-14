@@ -7,7 +7,7 @@ def build_exe():
     cmd = [
         "python", "-m", "nuitka",
         "--standalone",  # Mode
-        "--jobs=4",
+        "--jobs=16",
         "--windows-company-name=Bomiot",  # 公司名称
         "--windows-product-name=Bomiot",  # 产品名称
         "--windows-file-version=1.0.0",  # 文件版本
