@@ -23,11 +23,8 @@ jobs:
         
     - name: Install dependencies
       run: |
-        python -c "import django; django.setup(); print(django.conf.settings.INSTALLED_APPS)"
         python -m pip install --upgrade pip
         pip install nuitka
-        # 根据你 build.py 中包含的包，你需要一个 requirements.txt 文件来安装所有依赖
-        # 请确保你的项目中包含这个文件
         pip install -r requirements.txt
 
     - name: Create dummy files for Nuitka to include
