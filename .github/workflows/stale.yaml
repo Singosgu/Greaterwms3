@@ -27,6 +27,11 @@ jobs:
         pip install nuitka
         pip install -r requirements.txt
 
+    - name: Set environment variables
+      run: |
+        export DJANGO_SETTINGS_MODULE=bomiot.server.server.settings
+        export RUN_MAIN=true
+
     - name: Create dummy files for Nuitka to include
       run: |
         'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
