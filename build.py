@@ -23,7 +23,7 @@ def build_exe():
         "--include-data-dir=logs=logs",  # 包含日志目录
         "--include-data-dir=main=main",  # 包含日志目录
         "--include-data-file=setup.ini=setup.ini",  # 包含setup.ini文件
-        "--verbose",  # 输出详细信息
+        # "--verbose",  # 输出详细信息
         "--lto=yes",  # 开启链接时优化
         # 因为bomiot是虚拟环境中的包，不需要--include-package参数，让Nuitka自动跟随导入
         # 包含必要的包和数据文件
