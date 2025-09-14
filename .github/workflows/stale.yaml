@@ -31,7 +31,7 @@ jobs:
 
     - name: Create dummy files for Nuitka to include
       run: |
-        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ }
+        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
         touch setup.ini
         touch logo.ico
       shell: pwsh

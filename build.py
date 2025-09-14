@@ -19,8 +19,6 @@ def build_exe():
         "--no-pyi-file",  # 不生成.pyi文件
         "--output-dir=dist",
         "--output-filename=bomiot",  # 指定输出文件名
-        "--include-data-dir=dbs=dbs",  # 包含数据库目录
-        "--include-data-dir=logs=logs",  # 包含日志目录
         "--include-data-dir=main=main",  # 包含日志目录
         "--include-data-file=setup.ini=setup.ini",  # 包含setup.ini文件
         # "--lto=yes",  # 开启链接时优化
