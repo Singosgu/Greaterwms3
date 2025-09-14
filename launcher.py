@@ -15,6 +15,8 @@ import importlib.resources
 from os.path import join
 from pathlib import Path
 from configparser import ConfigParser
+import django
+django.setup()
 
 if __name__ == "__main__":
     # 生成auth_key.py
@@ -36,14 +38,6 @@ if __name__ == "__main__":
     working_config.read(working_path, encoding='utf-8')
     working_config.set('space', 'name', getcwd())
     working_config.write(open(working_path, "wt"))
-
-    # 设置 Django 环境变量
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
-    os.environ.setdefault("RUN_MAIN", "true")
-
-    # 初始化 Django
-    import django
-    django.setup()
 
     from django.core.management import call_command
     from django.apps import apps
