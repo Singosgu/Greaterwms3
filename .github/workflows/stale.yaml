@@ -43,7 +43,7 @@ jobs:
 
     - name: Upload executable
       # 将生成的 .exe 文件作为构建产物上传，方便下载
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: bomiot-exe
         path: dist/bomiot.exe
