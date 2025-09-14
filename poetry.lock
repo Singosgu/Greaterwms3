@@ -77,13 +77,13 @@ tests = ["mypy (>=1.14.0)", "pytest", "pytest-asyncio"]
 
 [[package]]
 name = "bomiot"
-version = "1.1.2"
+version = "1.1.4"
 description = "Powerful Distributed Document Management Framework & Full-Stack Development Platform"
 optional = false
 python-versions = "<=3.13,>=3.9"
 files = [
-    {file = "bomiot-1.1.2-py3-none-any.whl", hash = "sha256:64102db8fb2ae1b6f23af472181579cbaea6e67f73e25204864b30322ccea459"},
-    {file = "bomiot-1.1.2.tar.gz", hash = "sha256:270d0a19b16da0c5aa930db3527949ac0c6c46bbeaef6b21f825326166de0229"},
+    {file = "bomiot-1.1.4-py3-none-any.whl", hash = "sha256:30741205a25a5645a3c92213f054fc108ff95d39ee9d788d07b37f7945aabc9a"},
+    {file = "bomiot-1.1.4.tar.gz", hash = "sha256:e0c46888980f84c99d4d8be282ce7b60c92970b956bf5bdc6d2601dfb04458ce"},
 ]
 
 [package.dependencies]
@@ -1883,16 +1883,16 @@ files = [
 
 [[package]]
 name = "xlsxwriter"
-version = "3.2.7"
+version = "3.2.8"
 description = "A Python module for creating Excel XLSX files."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "xlsxwriter-3.2.7-py3-none-any.whl", hash = "sha256:26026162f4e477837dbcb2a23f5247772ea7d22df2f63169a3e8d061c7abb46b"},
-    {file = "xlsxwriter-3.2.7.tar.gz", hash = "sha256:c49825d3e010554be89a574cac68eebf6a8e4e354f65868ec3ede8fd0bd916aa"},
+    {file = "xlsxwriter-3.2.8-py3-none-any.whl", hash = "sha256:cb0baf8c9bcce14fdadd01297f4e6cd64901cf536283a1f4ab5d07290d85a66b"},
+    {file = "xlsxwriter-3.2.8.tar.gz", hash = "sha256:8c0dc8f1538c4052a4d4e07a1962750949c2a469138a6cfbc73349c88f6b39a7"},
 ]
 
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.9,<=3.13"
-content-hash = "eed9113b464084b4f1fa394ecc18845d56348a8079e25bffd03d5a12b8acb399"
+content-hash = "8ef0dce1af6c53cab9e16bf1812cdf672e233d9f9070bb49bf130339d9b5c69c"
