@@ -30,12 +30,11 @@ jobs:
         pip install -r requirements.txt
 
     - name: Create dummy files for Nuitka to include
-      # Nuitka 需要在打包时找到 --include-data-dir 和 --include-data-file 指定的目录和文件
-      # 此步骤是为了确保即使仓库中不存在这些文件，构建也能成功
       run: |
-        mkdir -p dbs logs main
+        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ }
         touch setup.ini
         touch logo.ico
+      shell: pwsh
         
     - name: Run Nuitka build
       # 执行你的 build.py 脚本来启动 Nuitka 打包过程
