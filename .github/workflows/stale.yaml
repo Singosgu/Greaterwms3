@@ -27,7 +27,8 @@ jobs:
         pip install nuitka
         pip install -r requirements.txt
 
-    - name: Set environment variables
+    - name: Set Django Settings
+      shell: bash # 明确指定使用 Bash
       run: |
         export DJANGO_SETTINGS_MODULE=bomiot.server.server.settings
         export RUN_MAIN=true
