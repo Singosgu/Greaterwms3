@@ -74,7 +74,7 @@ bomiot-token==0.7.0 ; python_version >= "3.9" and python_full_version <= "3.13.0
     --hash=sha256:d28d11870aa6ccd53c58e1d0609c1dc78e17d362f509cb548e25a4bb9bc1a790 \
     --hash=sha256:f57373a91b881ff87f723bb6f331048cfb1ed9dc8b452b464c5bbb260b294933 \
     --hash=sha256:fcc704fafee85f9c8c1ead84443b5e617f8f8f3236fc29faae038a9f883db6ca
-bomiot==1.1.2 ; python_version >= "3.9" and python_full_version <= "3.13.0" \
+bomiot==1.1.3 ; python_version >= "3.9" and python_full_version <= "3.13.0" \
     --hash=sha256:270d0a19b16da0c5aa930db3527949ac0c6c46bbeaef6b21f825326166de0229 \
     --hash=sha256:64102db8fb2ae1b6f23af472181579cbaea6e67f73e25204864b30322ccea459
 bsdiff4==1.2.6 ; python_version >= "3.9" and python_full_version <= "3.13.0" \
