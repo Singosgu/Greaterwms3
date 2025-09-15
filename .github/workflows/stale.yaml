@@ -65,7 +65,6 @@ jobs:
           linux-icon: logo.png
           clang: true
           lto: yes
-          upx-binary: upx
           
           # 包含的数据目录
           include-data-dir: |
