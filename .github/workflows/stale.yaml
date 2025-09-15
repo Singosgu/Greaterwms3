@@ -51,14 +51,16 @@ jobs:
 
     - name: Build Executable with Nuitka
       run: |
-        # 在所有系统上，将当前目录添加到 PYTHONPATH
-        # 这能确保 Nuitka 及其子进程可以找到你的项目模块
-        echo "PYTHONPATH: $PYTHONPATH"
-        export PYTHONPATH=.:$PYTHONPATH
-        
-        # 运行你的 build.py 脚本
-        python build.py
-      # env 块确保环境变量在整个步骤中都可用
+        # 检查操作系统
+        if [ "${{ runner.os }}" == "Windows" ]; then
+          # Windows PowerShell 语法
+          $env:PYTHONPATH="$env:PYTHONPATH;."
+          python build.py
+        else
+          # macOS/Ubuntu Bash 语法
+          export PYTHONPATH=.:$PYTHONPATH
+          python build.py
+        fi
       env:
         DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
         RUN_MAIN: true
