@@ -15,8 +15,7 @@ import importlib.resources
 from os.path import join
 from pathlib import Path
 from configparser import ConfigParser
-import django
-django.setup()
+
 
 
 
@@ -24,6 +23,8 @@ if __name__ == "__main__":
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
+    import django
+    django.setup()
     # 生成auth_key.py
     path = join(getcwd(), 'auth_key.py')
     if not exists(join(path)):
