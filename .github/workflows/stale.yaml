@@ -8,7 +8,10 @@ on:
 jobs:
 
   build:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest, ubuntu-latest, macos-latest]
 
     steps:
 
@@ -25,14 +28,50 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         with:
           nuitka-version: main
-          script-name: main.py
+          script-name: launcher.py
           mode: standalone
+
+          # Windows 相关参数，Nuitka-Action 会自动在非 Windows 系统上忽略它们
+          windows-icon-from-ico: logo.ico
+          
+          # 包含的数据目录
+          include-data-dir: |
+            dbs=dbs
+            logs=logs
+            main=main
+            
+          # 包含的数据文件
+          
+          # 包含的包
+          include-package: |
+            django
+            orjson
+            uvicorn
+            pandas
+            openpyxl
+            watchdog
+            tomlkit
+            psutil
+            xlsxwriter
+            requests
+            httptools
+            aiofiles
+            starlette
+            tufup
+            securesystemslib
+            cryptography
+            
+          # 包含的模块
+          include-module: bomiot
+            
+          # 特殊模块参数，用于 Django
+          module-parameter: django-settings-module=bomiot.server.server.settings
 
       # Uploads artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: windows Build
+          name: ${{ runner.os }} Build
           path: |
             build/*.exe
             build/*.bin
