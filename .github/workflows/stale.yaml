@@ -29,6 +29,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Build Executable with Nuitka (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
+          $env:RUN_MAIN="true"
+          $env:PYTHONPATH="$env:PYTHONPATH;."
+          $env:PYTHONIOENCODING="utf-8"
+          
+      - name: Build Executable with Nuitka (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          export DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
+          export RUN_MAIN="true"
+          export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
+          export PYTHONIOENCODING="utf-8"
+          
       # Build python script into a single execute or app folder (macOS)
       - uses: Nuitka/Nuitka-Action@main
         with:
