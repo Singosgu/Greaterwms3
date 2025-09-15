@@ -27,6 +27,7 @@ def build_exe():
         "--lto=yes",  # 开启链接时优化
         # 因为bomiot是虚拟环境中的包，不需要--include-package参数，让Nuitka自动跟随导入
         # 包含必要的包和数据文件
+        "--include-package=bomiot",
         "--include-package=django",
         "--include-package=orjson",
         "--include-package=uvicorn",
@@ -42,7 +43,11 @@ def build_exe():
         "--include-package=starlette",
         #djanogo 相关
         '--module-parameter=django-settings-module=bomiot.server.server.settings',
+        "--include-module=bomiot.server.server.settings",
         "--include-module=bomiot",
+        "--include-module=bomiot.server.server",
+        "--include-module=bomiot.server.core",
+        "--include-module=bomiot.cmd",
         # 新增：包含 tufup 及其依赖（确保更新功能正常）
         "--include-package=tufup",
         "--include-package=securesystemslib",  # tufup 依赖

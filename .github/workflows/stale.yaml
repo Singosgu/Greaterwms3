@@ -64,8 +64,10 @@ jobs:
     - name: Build Executable with Nuitka (Linux/macOS)
       if: runner.os != 'Windows'
       run: |
-        # macOS/Ubuntu Bash 语法
-        export PYTHONPATH=.:$PYTHONPATH
+        # 使用 GitHub Actions 的内置变量来确保路径正确
+        export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
+        
+        # 运行你的 build.py 脚本
         python build.py
       shell: bash
       env:
