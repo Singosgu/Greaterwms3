@@ -9,7 +9,6 @@
 /backup
 npm-debug.log
 /bomiot/server/.idea/
-/logs/
 /bomiot/.idea
 /bomiot/logs/
 bomiot/server/logs/
@@ -31,7 +30,6 @@ auth_key.py
 *.gz
 *.rar
 *.7z
-*.db
 *.sqlite3
 *.log
 *.pid
