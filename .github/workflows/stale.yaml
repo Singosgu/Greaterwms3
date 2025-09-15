@@ -50,6 +50,7 @@ jobs:
         $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
         $env:RUN_MAIN="true"
         $env:PYTHONPATH="$env:PYTHONPATH;."
+        $env:PYTHONIOENCODING="utf-8"
         python build.py
       shell: pwsh
       
