@@ -59,11 +59,6 @@ jobs:
           copyright: Copyright (c) 2024 Bomiot
           windows-console-mode: false
           windows-icon-from-ico: logo.ico
-          macos-app-icon: logo.icns
-          macos-signed-app-name: Bomiot
-          macos-app-name: Bomiot
-          macos-app-version: 1.0.0
-          linux-icon: logo.png
           lto: yes
           # 包含的数据目录
           include-data-dir: |
@@ -72,7 +67,7 @@ jobs:
             main=main
           # 包含的数据文件
           include-data-files: |
-            sqlite3.dll
+            sqlite3.dll=sqlite3.dll
           # 包含的包
           include-package: |
             bomiot
@@ -104,6 +99,113 @@ jobs:
           RUN_MAIN: "true"
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
           PYTHONIOENCODING: "utf-8"
+
+      # Build python script into a single execute or app folder (mscos)
+      - uses: Nuitka/Nuitka-Action@main
+        if : runner.os == 'macOS'
+        with:
+          nuitka-version: main
+          script-name: launcher.py
+          mode: standalone
+          company-name: Bomiot
+          product-name: Bomiot
+          file-version: 1.0.0
+          product-version: 1.0.0
+          copyright: Copyright (c) 2024 Bomiot
+          macos-app-icon: logo.icns
+          macos-signed-app-name: Bomiot
+          macos-app-name: Bomiot
+          macos-app-version: 1.0.0
+          lto: yes
+          # 包含的数据目录
+          include-data-dir: |
+            dbs=dbs
+            logs=logs
+            main=main
+          # 包含的包
+          include-package: |
+            bomiot
+            django
+            orjson
+            uvicorn
+            pandas
+            openpyxl
+            watchdog
+            tomlkit
+            psutil
+            xlsxwriter
+            requests
+            httptools
+            aiofiles
+            starlette
+            tufup
+            securesystemslib
+            cryptography
+          # 包含的模块
+          include-module: |
+            django.core.management
+          nofollow-import-to: |
+            pandas.tests
+          # 特殊模块参数，用于 Django
+          module-parameter: django-settings-module=bomiot.server.server.settings
+        env:
+          DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
+          RUN_MAIN: "true"
+          PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
+          PYTHONIOENCODING: "utf-8"
+
+      # Build python script into a single execute or app folder (Ubuntu)
+      - uses: Nuitka/Nuitka-Action@main
+        if : runner.os == 'Linux'
+        with:
+          nuitka-version: main
+          script-name: launcher.py
+          mode: standalone
+          company-name: Bomiot
+          product-name: Bomiot
+          file-version: 1.0.0
+          product-version: 1.0.0
+          copyright: Copyright (c) 2024 Bomiot
+          linux-icon: logo.png
+          lto: yes
+          # 包含的数据目录
+          include-data-dir: |
+            dbs=dbs
+            logs=logs
+            main=main
+          # 包含的包
+          include-package: |
+            bomiot
+            django
+            orjson
+            uvicorn
+            pandas
+            openpyxl
+            watchdog
+            tomlkit
+            psutil
+            xlsxwriter
+            requests
+            httptools
+            aiofiles
+            starlette
+            tufup
+            securesystemslib
+            cryptography
+          # 包含的模块
+          include-module: |
+            django.core.management
+          nofollow-import-to: |
+            pandas.tests
+          # 特殊模块参数，用于 Django
+          module-parameter: django-settings-module=bomiot.server.server.settings
+        env:
+          DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
+          RUN_MAIN: "true"
+          PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
+          PYTHONIOENCODING: "utf-8"
+
+
 
       # Uploads artifact
       - name: Upload Artifact
