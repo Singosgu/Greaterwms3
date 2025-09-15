@@ -35,6 +35,12 @@ jobs:
         echo "RUN_MAIN=true" >> $env:GITHUB_ENV
       shell: pwsh # 使用 pwsh (PowerShell) 是在 Windows 上最原生和可靠的方式
 
+    - name: Create dummy files for Nuitka to include
+      run: |
+        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
+        touch logo.ico
+      shell: pwsh
+
     - name: Build Executable with Nuitka
       run: |
         python build.py
