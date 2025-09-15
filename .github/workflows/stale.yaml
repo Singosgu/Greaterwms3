@@ -90,12 +90,13 @@ jobs:
             cryptography
             
           # 包含的模块
-          include-module: bomiot
+          include-module: |
+            bomiot
+            bomiot.server.server.settings
           
             
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-                            django-installed-apps=[]  # 临时规避自动解析，后续可替换为实际APP列表
           # 开启调试日志，方便排查
           debug: true
 
