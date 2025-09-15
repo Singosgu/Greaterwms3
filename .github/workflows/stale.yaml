@@ -38,7 +38,6 @@ jobs:
         mkdir -p dbs logs main
         touch logo.ico setup.ini
         # 运行打包脚本
-        python build.py
       shell: bash
 
     - name: Prepare build environment and run Nuitka (Windows)
@@ -57,8 +56,67 @@ jobs:
         'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
         touch logo.ico setup.ini
         # 运行打包脚本
-        python build.py
       shell: pwsh
+
+    - name: Build Executable with Nuitka
+      # 使用 Nuitka-Action 来代替手动调用 build.py
+      uses: Nuitka/Nuitka-Action@main
+      with:
+        # 主启动脚本，来自 launcher.py
+        nuitka-version: main
+        script-name: launcher.py
+        
+        # 将 build.py 中的所有参数转换为 Action 参数
+        mode: standalone
+        jobs: 16
+        clean-cache: all
+        assume-yes-for-downloads: true
+        remove-output: true
+        no-pyi-file: true
+        output-dir: dist
+        output-filename: bomiot
+        lto: yes
+        
+        # Windows 相关参数，Nuitka-Action 会自动在非 Windows 系统上忽略它们
+        windows-company-name: Bomiot
+        windows-product-name: Bomiot
+        windows-file-version: 1.0.0
+        windows-product-version: 1.0.0
+        windows-icon-from-ico: logo.ico
+        
+        # 包含的数据目录
+        include-data-dir: |
+          dbs=dbs
+          logs=logs
+          main=main
+          
+        # 包含的数据文件
+        include-data-file: setup.ini=setup.ini
+        
+        # 包含的包
+        include-package: |
+          django
+          orjson
+          uvicorn
+          pandas
+          openpyxl
+          watchdog
+          tomlkit
+          psutil
+          xlsxwriter
+          requests
+          httptools
+          aiofiles
+          starlette
+          tufup
+          securesystemslib
+          cryptography
+          
+        # 包含的模块
+        include-module: bomiot
+          
+        # 特殊模块参数，用于 Django
+        module-parameter: django-settings-module=bomiot.server.server.settings
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
