@@ -35,10 +35,12 @@ jobs:
       shell: pwsh # 使用 pwsh (PowerShell) 是在 Windows 上最原生和可靠的方式
 
     - name: Build Executable with Nuitka
-      uses: Nuitka/Nuitka-Action@main
-      with:
-         nuitka-version: main
-         script-name: build.py
+      run: |
+        python build.py
+      env:
+        DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
+        RUN_MAIN: true
+        PYTHONIOENCODING: utf-8
         
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
