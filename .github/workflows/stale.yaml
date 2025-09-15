@@ -63,7 +63,6 @@ jobs:
           macos-app-name: Bomiot
           macos-app-version: 1.0.0
           linux-icon: logo.png
-          clang: true
           lto: yes
           
           # 包含的数据目录
