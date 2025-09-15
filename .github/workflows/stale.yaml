@@ -93,13 +93,8 @@ jobs:
           include-module: |
             bomiot
             django.core.management
-          
-            
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-
-          disable-cache: true
-          
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"

@@ -43,11 +43,8 @@ def build_exe():
         "--include-package=starlette",
         #djanogo 相关
         '--module-parameter=django-settings-module=bomiot.server.server.settings',
-        "--include-module=bomiot.server.server.settings",
         "--include-module=bomiot",
-        "--include-module=bomiot.server.server",
-        "--include-module=bomiot.server.core",
-        "--include-module=bomiot.cmd",
+        "--include-module=django.core.management",
         # 新增：包含 tufup 及其依赖（确保更新功能正常）
         "--include-package=tufup",
         "--include-package=securesystemslib",  # tufup 依赖
