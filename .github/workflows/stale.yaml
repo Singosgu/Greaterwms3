@@ -10,68 +10,61 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, ubuntu-latest, macos-latest]
     
     steps:
     - name: Checkout code
-      # 检出你的仓库代码
       uses: actions/checkout@v4
 
     - name: Set up Python
-      # 设置 Python 环境
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        
-    - name: Install dependencies
+
+    - name: Prepare build environment and run Nuitka
+      # 使用 Bash 语法处理所有非 Windows 系统
+      if: runner.os != 'Windows'
       run: |
         python -m pip install --upgrade pip
         pip install nuitka
         pip install -r requirements.txt
-
-    - name: Create dummy files for Nuitka to include (Windows)
-      run: |
-        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
-        touch logo.ico
-      shell: pwsh
-      if: runner.os == 'Windows'
-
-    - name: Create dummy files for Nuitka to include (Unix)
-      run: |
-        mkdir -p dbs logs main
-        touch logo.ico
-      shell: bash
-      if: runner.os != 'Windows'
-
-    - name: Build Executable with Nuitka (Windows)
-      if: runner.os == 'Windows'
-      run: |
-        # Windows PowerShell 语法：在同一会话中设置环境变量
-        $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
-        $env:RUN_MAIN="true"
-        $env:PYTHONPATH="$env:PYTHONPATH;."
-        $env:PYTHONIOENCODING="utf-8"
-        python build.py
-      shell: pwsh
-      
-    - name: Build Executable with Nuitka (Linux/macOS)
-      if: runner.os != 'Windows'
-      run: |
-        # Linux/macOS Bash 语法：在同一会话中设置环境变量
+        # 确保 Nuitka 能够找到你的项目根目录
+        export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
+        # 在该会话中设置 Django 环境变量
         export DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
         export RUN_MAIN="true"
-        
-        # 确保 Python 路径正确
-        export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
-        
+        export PYTHONIOENCODING="utf-8"
+        # 确保所需的数据目录和文件存在
+        mkdir -p dbs logs main
+        touch logo.ico setup.ini
+        # 运行打包脚本
         python build.py
       shell: bash
-        
+
+    - name: Prepare build environment and run Nuitka (Windows)
+      # 使用 PowerShell 语法处理 Windows 系统
+      if: runner.os == 'Windows'
+      run: |
+        python -m pip install --upgrade pip
+        pip install nuitka
+        pip install -r requirements.txt
+        # 在该会话中设置环境变量
+        $env:PYTHONPATH="$env:PYTHONPATH;."
+        $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
+        $env:RUN_MAIN="true"
+        $env:PYTHONIOENCODING="utf-8"
+        # 确保所需的数据目录和文件存在
+        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
+        touch logo.ico setup.ini
+        # 运行打包脚本
+        python build.py
+      shell: pwsh
+
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ${{ runner.os }} Build
-        path: | # match what's created for the 3 OSes
-            build/*.exe
-            build/*.bin
-            build/*.app/**/*
+        path: |
+          dist/*.exe
+          dist/*.bin
+          dist/*.app
