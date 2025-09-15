@@ -49,18 +49,25 @@ jobs:
       shell: bash
       if: runner.os != 'Windows'
 
-    - name: Build Executable with Nuitka
+    - name: Build Executable with Nuitka (Windows)
+      if: runner.os == 'Windows'
       run: |
-        # 检查操作系统
-        if [ "${{ runner.os }}" == "Windows" ]; then
-          # Windows PowerShell 语法
-          $env:PYTHONPATH="$env:PYTHONPATH;."
-          python build.py
-        else
-          # macOS/Ubuntu Bash 语法
-          export PYTHONPATH=.:$PYTHONPATH
-          python build.py
-        fi
+        # Windows PowerShell 语法
+        $env:PYTHONPATH="$env:PYTHONPATH;."
+        python build.py
+      shell: pwsh
+      env:
+        DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
+        RUN_MAIN: true
+        PYTHONIOENCODING: utf-8
+      
+    - name: Build Executable with Nuitka (Linux/macOS)
+      if: runner.os != 'Windows'
+      run: |
+        # macOS/Ubuntu Bash 语法
+        export PYTHONPATH=.:$PYTHONPATH
+        python build.py
+      shell: bash
       env:
         DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
         RUN_MAIN: true
