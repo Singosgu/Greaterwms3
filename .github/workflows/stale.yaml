@@ -45,8 +45,9 @@ jobs:
           export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
           export PYTHONIOENCODING="utf-8"
           
-      # Build python script into a single execute or app folder (macOS)
+      # Build python script into a single execute or app folder (windows)
       - uses: Nuitka/Nuitka-Action@main
+        if : runner.os == 'Windows'
         with:
           nuitka-version: main
           script-name: launcher.py
@@ -64,17 +65,14 @@ jobs:
           macos-app-version: 1.0.0
           linux-icon: logo.png
           lto: yes
-          
           # 包含的数据目录
           include-data-dir: |
             dbs=dbs
             logs=logs
             main=main
-          
           # 包含的数据文件
           include-data-files: |
             sqlite3.dll
-            
           # 包含的包
           include-package: |
             bomiot
@@ -94,11 +92,9 @@ jobs:
             tufup
             securesystemslib
             cryptography
-            
           # 包含的模块
           include-module: |
             django.core.management
-
           nofollow-import-to: |
             pandas.tests
           # 特殊模块参数，用于 Django
