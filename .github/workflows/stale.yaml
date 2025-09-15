@@ -46,9 +46,6 @@ jobs:
             logs=logs
             main=main
             
-          # 包含的数据文件
-          install-deps: true
-
           # 包含的包
           include-package: |
             django
