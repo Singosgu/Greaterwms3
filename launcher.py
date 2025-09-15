@@ -38,17 +38,9 @@ if __name__ == "__main__":
             f.write(f'KEY = "{key_code}"\n')
         f.close()
 
-    # 生成 workspace.ini
-    working_config = ConfigParser()
-    working_path = join(getcwd(), 'workspace.ini')
-    working_config.read(working_path, encoding='utf-8')
-    working_config.set('space', 'name', getcwd())
-    working_config.write(open(working_path, "wt"))
-
     from django.core.management import call_command
     from django.apps import apps
     from django.contrib.auth import get_user_model
-    
 
     # 准备 makemigrations 命令参数
     cmd_args = ["makemigrations"]

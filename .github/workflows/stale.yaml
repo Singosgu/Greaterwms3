@@ -51,9 +51,21 @@ jobs:
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
-
-          # Windows 相关参数，Nuitka-Action 会自动在非 Windows 系统上忽略它们
+          company-name: Bomiot
+          product-name: Bomiot
+          file-version: 1.0.0
+          product-version: 1.0.0
+          copyright: Copyright (c) 2024 Bomiot
+          windows-console-mode: false
           windows-icon-from-ico: logo.ico
+          macos-app-icon: logo.icns
+          macos-signed-app-name: Bomiot
+          macos-app-name: Bomiot
+          macos-app-version: 1.0.0
+          linux-icon: logo.png
+          clang: true
+          lto: true
+          upx-binary: upx
           
           # 包含的数据目录
           include-data-dir: |
@@ -84,6 +96,9 @@ jobs:
           # 包含的模块
           include-module: |
             django.core.management
+
+          nofollow-import-to: |
+            pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
         env:
