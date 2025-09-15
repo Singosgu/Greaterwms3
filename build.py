@@ -69,7 +69,5 @@ def build_exe():
         sys.exit(1)
 
 if __name__ == "__main__":
-    # 设置 Django 环境变量
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
-    os.environ.setdefault("RUN_MAIN", "true")
+
     build_exe()
