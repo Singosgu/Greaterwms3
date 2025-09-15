@@ -11,7 +11,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest]
+        os: [windows-latest, macos-latest, ubuntu-latest]
 
     steps:
 
@@ -92,14 +92,11 @@ jobs:
           # 包含的模块
           include-module: |
             bomiot
-            bomiot.server.server.settings
             django.core.management
           
             
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-          # 开启调试日志，方便排查
-          debug: true
 
           disable-cache: true
           
