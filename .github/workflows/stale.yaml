@@ -66,10 +66,13 @@ jobs:
             
           # 包含的模块
           include-module: bomiot
+          
             
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
 
+          disable-cache: true
+          
       # Uploads artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
