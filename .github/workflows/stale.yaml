@@ -29,12 +29,6 @@ jobs:
         pip install nuitka
         pip install -r requirements.txt
 
-    - name: Set Django Settings for GitHub Actions
-      run: |
-        echo "DJANGO_SETTINGS_MODULE=bomiot.server.server.settings" >> $env:GITHUB_ENV
-        echo "RUN_MAIN=true" >> $env:GITHUB_ENV
-      shell: pwsh # 使用 pwsh (PowerShell) 是在 Windows 上最原生和可靠的方式
-
     - name: Create dummy files for Nuitka to include (Windows)
       run: |
         'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
@@ -52,28 +46,25 @@ jobs:
     - name: Build Executable with Nuitka (Windows)
       if: runner.os == 'Windows'
       run: |
-        # Windows PowerShell 语法
+        # Windows PowerShell 语法：在同一会话中设置环境变量
+        $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
+        $env:RUN_MAIN="true"
         $env:PYTHONPATH="$env:PYTHONPATH;."
         python build.py
       shell: pwsh
-      env:
-        DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
-        RUN_MAIN: true
-        PYTHONIOENCODING: utf-8
       
     - name: Build Executable with Nuitka (Linux/macOS)
       if: runner.os != 'Windows'
       run: |
-        # 使用 GitHub Actions 的内置变量来确保路径正确
+        # Linux/macOS Bash 语法：在同一会话中设置环境变量
+        export DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
+        export RUN_MAIN="true"
+        
+        # 确保 Python 路径正确
         export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
         
-        # 运行你的 build.py 脚本
         python build.py
       shell: bash
-      env:
-        DJANGO_SETTINGS_MODULE: bomiot.server.server.settings
-        RUN_MAIN: true
-        PYTHONIOENCODING: utf-8
         
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
