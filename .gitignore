@@ -19,7 +19,6 @@ notice.*
 *.pyc
 .venv
 /admin
-setup.ini
 asgi.py
 /.history
 auth_key.py
