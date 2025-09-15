@@ -1,4 +1,0 @@
-from time import sleep
-
-print(11111111111111111111111111111111111)
-sleep(1000)

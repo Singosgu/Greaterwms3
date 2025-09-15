@@ -70,6 +70,10 @@ jobs:
             dbs=dbs
             logs=logs
             main=main
+          
+          # 包含的数据文件
+          include-data-files: |
+            sqlite3.dll
             
           # 包含的包
           include-package: |
