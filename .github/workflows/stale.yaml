@@ -26,7 +26,6 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install nuitka
         pip install -r requirements.txt
 
     - name: Set Django Settings for GitHub Actions
@@ -35,22 +34,17 @@ jobs:
         echo "RUN_MAIN=true" >> $env:GITHUB_ENV
       shell: pwsh # 使用 pwsh (PowerShell) 是在 Windows 上最原生和可靠的方式
 
-    - name: Create dummy files for Nuitka to include
-      run: |
-        'dbs', 'logs', 'main' | ForEach-Object { mkdir $_ -Force }
-        touch setup.ini
-        touch logo.ico
-      shell: pwsh
-          
     - name: Build Executable with Nuitka
       uses: Nuitka/Nuitka-Action@main
       with:
          nuitka-version: main
          script-name: build.py
         
-    - name: Upload executable
-      # 将生成的 .exe 文件作为构建产物上传，方便下载
+    - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: bomiot-exe
-        path: dist/bomiot.exe
+        name: ${{ runner.os }} Build
+        path: | # match what's created for the 3 OSes
+            build/*.exe
+            build/*.bin
+            build/*.app/**/*
