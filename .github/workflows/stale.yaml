@@ -49,6 +49,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'Windows'
         with:
+          jobs: 4
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
@@ -104,6 +105,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'macOS'
         with:
+          jobs: 4
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
@@ -158,6 +160,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'Linux'
         with:
+          jobs: 4
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
