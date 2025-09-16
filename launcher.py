@@ -82,7 +82,9 @@ if __name__ == "__main__":
         call_command('migrate')
     except Exception as e:
         print(f"Error during migration: {e}")
-        
+    
+    sleep(10)
+    print('正在启动系统')
     # 启动 Django 开发服务器
     uvicorn.run(
         "bomiot_asgi:application",
