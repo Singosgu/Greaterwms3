@@ -67,7 +67,7 @@ jobs:
           include-data-files: |
             setup.ini=setup.ini
           # 包含的数据目录
-          include-data-dir: |
+          include-raw-dir: |
             main=main
           # 包含的包
           include-package: |
@@ -128,7 +128,7 @@ jobs:
           macos-app-name: Bomiot
           macos-app-version: 1.0.0
           # 包含的数据目录
-          include-data-dir: |
+          include-raw-dir: |
             main=main
           # 包含的数据文件
           include-data-files: |
@@ -190,7 +190,7 @@ jobs:
           linux-icon: logo.png
           lto: yes
           # 包含的数据目录
-          include-data-dir: |
+          include-raw-dir: |
             main=main
           # 包含的数据文件
           include-data-files: |
