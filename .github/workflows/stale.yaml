@@ -95,8 +95,6 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-          enable-plugins: tufup
-          auto-update-url-spec: 'http://3.135.61.8:8008/media/update' 
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
@@ -152,8 +150,6 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-          enable-plugins: tufup
-          auto-update-url-spec: 'http://3.135.61.8:8008/media/update'
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
@@ -206,8 +202,6 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
-          enable-plugins: tufup
-          auto-update-url-spec: 'http://3.135.61.8:8008/media/update'
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"

@@ -11,7 +11,7 @@ def run_update():
         # 这里你可以直接实例化 Client，它会自动获取该 URL。
         # 如果你没有在 Nuitka 参数中指定 auto-update-url-spec，
         # 你需要在这里提供硬编码的 URL，例如：Client("https://your.update.server")
-        client = Client()
+        client = Client('http://3.135.61.8:8008/media/update')
 
         # 检查并下载更新
         print("正在检查更新...")
