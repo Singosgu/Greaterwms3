@@ -53,7 +53,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'Windows'
         with:
-          jobs: 4
+          jobs: 16
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
@@ -62,9 +62,7 @@ jobs:
           file-version: 1.0.0
           product-version: 1.0.0
           copyright: Copyright (c) 2024 Bomiot
-          windows-console-mode: false
           windows-icon-from-ico: logo.ico
-          lto: yes
           # 包含的数据文件
           include-data-files: |
             setup.ini=setup.ini
