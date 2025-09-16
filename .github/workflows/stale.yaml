@@ -64,6 +64,9 @@ jobs:
           windows-console-mode: false
           windows-icon-from-ico: logo.ico
           lto: yes
+          # 包含的数据文件
+          include-data-files: |
+            setup.ini=setup.ini
           # 包含的数据目录
           include-data-dir: |
             dbs=dbs
@@ -90,6 +93,10 @@ jobs:
             cryptography
           # 包含的模块
           include-module: |
+            bomiot-asgi
+            bomiot-token
+            bomiot-message
+            bomiot-control
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -124,6 +131,9 @@ jobs:
             dbs=dbs
             logs=logs
             main=main
+          # 包含的数据文件
+          include-data-files: |
+            setup.ini=setup.ini
           # 包含的包
           include-package: |
             bomiot
@@ -145,6 +155,10 @@ jobs:
             cryptography
           # 包含的模块
           include-module: |
+            bomiot-asgi
+            bomiot-token
+            bomiot-message
+            bomiot-control
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -176,6 +190,9 @@ jobs:
             dbs=dbs
             logs=logs
             main=main
+          # 包含的数据文件
+          include-data-files: |
+            setup.ini=setup.ini
           # 包含的包
           include-package: |
             bomiot
@@ -197,6 +214,10 @@ jobs:
             cryptography
           # 包含的模块
           include-module: |
+            bomiot-asgi
+            bomiot-token
+            bomiot-message
+            bomiot-control
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -208,13 +229,11 @@ jobs:
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
           PYTHONIOENCODING: "utf-8"
 
-
-
       # Uploads artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ runner.os }} Build
+          name: Bomiot-${{ runner.os }}
           path: |
             build/*.exe
             build/*.bin
