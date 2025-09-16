@@ -70,7 +70,6 @@ jobs:
             setup.ini=setup.ini
           # 包含的数据目录
           include-data-dir: |
-            dbs=dbs
             logs=logs
             main=main
           # 包含的包
@@ -134,7 +133,6 @@ jobs:
           lto: yes
           # 包含的数据目录
           include-data-dir: |
-            dbs=dbs
             logs=logs
             main=main
           # 包含的数据文件
@@ -198,7 +196,6 @@ jobs:
           lto: yes
           # 包含的数据目录
           include-data-dir: |
-            dbs=dbs
             logs=logs
             main=main
           # 包含的数据文件
