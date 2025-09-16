@@ -5,7 +5,8 @@ import os
 import uvicorn
 import time
 from bomiot import version
-import re
+import socket
+import webbrowser
 from bomiot_token import encrypt_info
 from bomiot.cmd.killport import kill_process_on_port
 from os.path import join, exists 
@@ -121,3 +122,9 @@ if __name__ == "__main__":
         timeout_graceful_shutdown=30,
         loop="auto",
     )
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 80))
+    ip = s.getsockname()[0]
+    s.close()
+    baseurl = "http://" + ip + ":8008"
+    webbrowser.open(baseurl)
