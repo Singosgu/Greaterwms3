@@ -26,7 +26,7 @@ jobs:
           cache: 'pip'
           cache-dependency-path: |
             **/requirements*.txt
-            
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -69,9 +69,6 @@ jobs:
             dbs=dbs
             logs=logs
             main=main
-          # 包含的数据文件
-          include-data-files: |
-            sqlite3.dll=sqlite3.dll
           # 包含的包
           include-package: |
             bomiot
@@ -98,6 +95,8 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
+          enable-plugins: tufup
+          auto-update-url-spec: 'http://3.135.61.8:8008/media/update' 
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
@@ -153,6 +152,8 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
+          enable-plugins: tufup
+          auto-update-url-spec: 'http://3.135.61.8:8008/media/update'
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
@@ -205,6 +206,8 @@ jobs:
             pandas.tests
           # 特殊模块参数，用于 Django
           module-parameter: django-settings-module=bomiot.server.server.settings
+          enable-plugins: tufup
+          auto-update-url-spec: 'http://3.135.61.8:8008/media/update'
         env:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"

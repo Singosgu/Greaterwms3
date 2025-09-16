@@ -15,11 +15,21 @@ import importlib.resources
 from os.path import join
 from pathlib import Path
 from configparser import ConfigParser
-
+from update import run_update
 
 
 
 if __name__ == "__main__":
+    # ... 生成 auth_key.py 和 workspace.ini 的代码 ...
+    
+    # ================== 自动更新逻辑 ==================
+    # 运行更新检查
+    needs_restart = run_update()
+    
+    # 如果更新成功，退出当前进程以允许外部脚本或用户重启
+    print('是否更新成功', needs_restart)
+    if needs_restart:
+        sys.exit(0)
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
