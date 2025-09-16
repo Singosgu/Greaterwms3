@@ -91,12 +91,17 @@ jobs:
             tufup
             securesystemslib
             cryptography
-          # 包含的模块
-          include-module: |
             bomiot_asgi
             bomiot_token
             bomiot_message
             bomiot_control
+            django-filter
+            djangorestframework-csv
+            djangorestframework
+            django-apscheduler
+            django-cors-headers
+          # 包含的模块
+          include-module: |
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -153,12 +158,16 @@ jobs:
             tufup
             securesystemslib
             cryptography
-          # 包含的模块
-          include-module: |
             bomiot_asgi
             bomiot_token
             bomiot_message
             bomiot_control
+            djangorestframework-csv
+            djangorestframework
+            django-apscheduler
+            django-cors-headers
+          # 包含的模块
+          include-module: |
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -212,12 +221,16 @@ jobs:
             tufup
             securesystemslib
             cryptography
-          # 包含的模块
-          include-module: |
             bomiot_asgi
             bomiot_token
             bomiot_message
             bomiot_control
+            djangorestframework-csv
+            djangorestframework
+            django-apscheduler
+            django-cors-headers
+          # 包含的模块
+          include-module: |
             django.core.management
           nofollow-import-to: |
             pandas.tests
@@ -233,7 +246,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bomiot_${{ runner.os }}
+          name: bomiot-${{ runner.os }}
           path: |
             build/*.exe
             build/*.bin
