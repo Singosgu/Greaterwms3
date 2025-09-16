@@ -82,26 +82,6 @@ if __name__ == "__main__":
         call_command('migrate')
     except Exception as e:
         print(f"Error during migration: {e}")
-
-    # 初始化管理员
-    User = get_user_model()
-
-    try:
-        User.objects.get(username='admin', is_superuser=True)
-        print('Admin user already exists, you can use admin to login:')
-    except:
-        username = 'admin'
-        email = f'{username}@bomiot.com'
-        password = username
-        admin, created = User.objects.update_or_create(email=email, username=username)
-        admin.set_password(password)
-        admin.is_active = True
-        admin.is_superuser = True
-        admin.is_staff = True
-        admin.save()
-        print('%s admin account: %s(%s), initial password: %s, just use it temporarily '
-              'and change the password for safety' % \
-              ('Created' if created else 'Reset', username, email, password))
         
     # 启动 Django 开发服务器
     uvicorn.run(
@@ -122,6 +102,7 @@ if __name__ == "__main__":
         timeout_graceful_shutdown=30,
         loop="auto",
     )
+    sleep(100)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(('8.8.8.8', 80))
     ip = s.getsockname()[0]

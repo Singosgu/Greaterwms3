@@ -63,6 +63,7 @@ jobs:
           product-version: 1.0.0
           copyright: Copyright (c) 2024 Bomiot
           windows-icon-from-ico: logo.ico
+          lto: yes
           # 包含的数据文件
           include-data-files: |
             setup.ini=setup.ini
