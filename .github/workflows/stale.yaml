@@ -68,7 +68,6 @@ jobs:
             setup.ini=setup.ini
           # 包含的数据目录
           include-data-dir: |
-            logs=logs
             main=main
           # 包含的包
           include-package: |
@@ -130,7 +129,6 @@ jobs:
           macos-app-version: 1.0.0
           # 包含的数据目录
           include-data-dir: |
-            logs=logs
             main=main
           # 包含的数据文件
           include-data-files: |
@@ -180,7 +178,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'Linux'
         with:
-          jobs: 4
+          jobs: 16
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
@@ -193,7 +191,6 @@ jobs:
           lto: yes
           # 包含的数据目录
           include-data-dir: |
-            logs=logs
             main=main
           # 包含的数据文件
           include-data-files: |
