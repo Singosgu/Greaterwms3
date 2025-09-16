@@ -98,6 +98,7 @@ jobs:
             bomiot_control
             django_filters
             rest_framework
+            rest_framework_csv
             django_apscheduler
             corsheaders
           # 包含的模块
@@ -164,6 +165,7 @@ jobs:
             bomiot_control
             django_filters
             rest_framework
+            rest_framework_csv
             django_apscheduler
             corsheaders
           # 包含的模块
@@ -227,6 +229,7 @@ jobs:
             bomiot_control
             django_filters
             rest_framework
+            rest_framework_csv
             django_apscheduler
             corsheaders
           # 包含的模块
