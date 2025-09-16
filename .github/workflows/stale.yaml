@@ -95,11 +95,10 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            django-filter
-            djangorestframework-csv
-            djangorestframework
-            django-apscheduler
-            django-cors-headers
+            django_filter
+            rest_framework
+            django_apscheduler
+            corsheaders
           # 包含的模块
           include-module: |
             django.core.management
@@ -162,10 +161,10 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            djangorestframework-csv
-            djangorestframework
-            django-apscheduler
-            django-cors-headers
+            django_filter
+            rest_framework
+            django_apscheduler
+            corsheaders
           # 包含的模块
           include-module: |
             django.core.management
@@ -225,10 +224,10 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            djangorestframework-csv
-            djangorestframework
-            django-apscheduler
-            django-cors-headers
+            django_filter
+            rest_framework
+            django_apscheduler
+            corsheaders
           # 包含的模块
           include-module: |
             django.core.management
