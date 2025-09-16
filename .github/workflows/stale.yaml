@@ -117,7 +117,7 @@ jobs:
       - uses: Nuitka/Nuitka-Action@main
         if : runner.os == 'macOS'
         with:
-          jobs: 4
+          jobs: 16
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
@@ -130,7 +130,6 @@ jobs:
           macos-signed-app-name: Bomiot
           macos-app-name: Bomiot
           macos-app-version: 1.0.0
-          lto: yes
           # 包含的数据目录
           include-data-dir: |
             logs=logs
