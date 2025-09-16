@@ -96,7 +96,7 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            django-filter
+            django_filters
             rest_framework
             django_apscheduler
             corsheaders
@@ -162,7 +162,7 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            django-filter
+            django_filters
             rest_framework
             django_apscheduler
             corsheaders
@@ -225,7 +225,7 @@ jobs:
             bomiot_token
             bomiot_message
             bomiot_control
-            django-filter
+            django_filters
             rest_framework
             django_apscheduler
             corsheaders
