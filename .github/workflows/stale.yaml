@@ -1,5 +1,10 @@
 name: Nuitka Build
 
+env:
+  APP_NAME: "Bomiot"  # 应用名称（全局共享）
+  BASE_VERSION: "${{ env.BASE_VERSION }}"  # 基础版本号（全局共享）
+
+
 on:
   push:
     branches:
@@ -57,11 +62,11 @@ jobs:
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
-          company-name: Bomiot
-          product-name: Bomiot
-          file-version: 1.0.0
-          product-version: 1.0.0
-          copyright: Copyright (c) 2024 Bomiot
+          company-name: ${{ env.APP_NAME }}
+          product-name: ${{ env.APP_NAME }}
+          file-version: ${{ env.BASE_VERSION }}
+          product-version: ${{ env.BASE_VERSION }}
+          copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           windows-icon-from-ico: logo.ico
           lto: yes
           # 包含的数据文件
@@ -119,15 +124,15 @@ jobs:
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
-          company-name: Bomiot
-          product-name: Bomiot
-          file-version: 1.0.0
-          product-version: 1.0.0
-          copyright: Copyright (c) 2024 Bomiot
+          company-name: ${{ env.APP_NAME }}
+          product-name: ${{ env.APP_NAME }}
+          file-version: ${{ env.BASE_VERSION }}
+          product-version: ${{ env.BASE_VERSION }}
+          copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           macos-app-icon: logo.icns
-          macos-signed-app-name: Bomiot
-          macos-app-name: Bomiot
-          macos-app-version: 1.0.0
+          macos-signed-app-name: ${{ env.APP_NAME }}
+          macos-app-name: ${{ env.APP_NAME }}
+          macos-app-version: ${{ env.BASE_VERSION }}
           lto: yes
           # 包含的数据目录
           include-raw-dir: |
@@ -184,11 +189,11 @@ jobs:
           nuitka-version: main
           script-name: launcher.py
           mode: standalone
-          company-name: Bomiot
-          product-name: Bomiot
-          file-version: 1.0.0
-          product-version: 1.0.0
-          copyright: Copyright (c) 2024 Bomiot
+          company-name: ${{ env.APP_NAME }}
+          product-name: ${{ env.APP_NAME }}
+          file-version: ${{ env.BASE_VERSION }}
+          product-version: ${{ env.BASE_VERSION }}
+          copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           linux-icon: logo.png
           lto: yes
           # 包含的数据目录
@@ -242,7 +247,7 @@ jobs:
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: bomiot-${{ runner.os }}
+          name: ${{ env.APP_NAME }}-${{ env.BASE_VERSION }}-${{ runner.os }}
           path: |
             build/*.exe
             build/*.bin
