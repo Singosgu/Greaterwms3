@@ -133,7 +133,6 @@ jobs:
           macos-signed-app-name: ${{ env.APP_NAME }}
           macos-app-name: ${{ env.APP_NAME }}
           macos-app-version: ${{ env.BASE_VERSION }}
-          lto: yes
           # 包含的数据目录
           include-raw-dir: |
             main=main

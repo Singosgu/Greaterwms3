@@ -4,6 +4,8 @@ import os
 from tufup.client import Client
 from bomiot import version  # 导入当前应用版本
 
+app_name = "Bomiot"
+
 def get_update_server_url():
     """根据操作系统返回不同的更新 URL"""
     system = platform.system()
@@ -36,10 +38,11 @@ def run_update():
         
         # 实例化 tufup 客户端（补充必填参数）
         client = Client(
+            app_name=app_name,              # 应用名称
             app_install_dir=app_install_dir,  # 应用安装目录
             target_dir=target_dir,            # 更新目标目录
             current_version=version,          # 当前应用版本（需确保 bomiot.version 存在且格式正确）
-            metadata_base_url=metadata_base_url,
+            metadata_dir=metadata_base_url,
             target_base_url=target_base_url
         )
         
