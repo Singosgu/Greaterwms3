@@ -16,12 +16,23 @@ from os.path import join
 from pathlib import Path
 from configparser import ConfigParser
 from update import run_update
-
+import tkinter as tk
 
 
 if __name__ == "__main__":
-    # ... 生成 auth_key.py 和 workspace.ini 的代码 ...
-    
+    # 欢迎页
+    splash = tk.Tk()
+    x = int(splash.winfo_screenwidth() / 2 - splash.winfo_reqwidth() / 2)
+    y = int(splash.winfo_screenheight() / 2 - splash.winfo_reqheight() / 2)
+    canvas = tk.Canvas(splash, width=640, height=400, bg='white', highlightthickness=0)
+    img = tk.PhotoImage(file=join(getcwd(), 'logo.png'))
+    canvas.create_image(0, 0, anchor=tk.NW, image=img)
+    canvas.pack()
+
+    splash.title("Wlcome to Bomiot")
+    splash.geometry(f'640x400+{x}+{y}')
+    splash.overrideredirect(True)
+
     # ================== 自动更新逻辑 ==================
     # 运行更新检查
     needs_restart = run_update()
@@ -84,6 +95,8 @@ if __name__ == "__main__":
     
     sleep(10)
     print('正在启动系统')
+    splash.after(1000, lambda: splash.destroy())
+    tk.mainloop()
     # 启动 Django 开发服务器
     os.environ.setdefault("IS_LAN", "true")
     uvicorn.run(
