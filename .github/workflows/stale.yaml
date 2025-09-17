@@ -69,6 +69,7 @@ jobs:
           copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           windows-icon-from-ico: logo.ico
           lto: yes
+          enable-plugins: tk-inter
           # 包含的数据文件
           include-data-files: |
             setup.ini=setup.ini
@@ -133,6 +134,7 @@ jobs:
           macos-signed-app-name: ${{ env.APP_NAME }}
           macos-app-name: ${{ env.APP_NAME }}
           macos-app-version: ${{ env.BASE_VERSION }}
+          enable-plugins: tk-inter
           # 包含的数据目录
           include-raw-dir: |
             main=main
@@ -195,6 +197,7 @@ jobs:
           copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           linux-icon: logo.png
           lto: yes
+          enable-plugins: tk-inter
           # 包含的数据目录
           include-raw-dir: |
             main=main
