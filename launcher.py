@@ -86,6 +86,7 @@ if __name__ == "__main__":
     sleep(10)
     print('正在启动系统')
     # 启动 Django 开发服务器
+    os.environ.setdefault("IS_LAN", "true")
     uvicorn.run(
         "bomiot_asgi:application",
         host='0.0.0.0',

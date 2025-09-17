@@ -2,8 +2,6 @@ import platform
 import sys
 from pathlib import Path
 from tufup.client import Client
-from tufup.utils import Version
-from bomiot import version  # 假设从bomiot模块获取当前版本号
 from os import getcwd
 
 
@@ -52,7 +50,7 @@ def run_update() -> bool:
         # 实例化tufup客户端
         client = Client(
             app_name="Bomiot",  # 应用名称，需与服务器端配置一致
-            current_version=Version(version),  # 当前应用版本
+            current_version="1.0.0",  # 当前应用版本
             metadata_base_url=metadata_base_url,
             target_base_url=target_base_url,
             metadata_dir=metadata_dir,  # 本地存储元数据的目录
@@ -62,7 +60,7 @@ def run_update() -> bool:
         )
 
         # 检查是否有可用更新
-        print(f"正在检查更新，当前版本: {version}")
+        print(f"正在检查更新，当前版本: 1.0.0")
         update_info = client.check_for_updates()
 
         if not update_info:
