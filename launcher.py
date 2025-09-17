@@ -104,10 +104,13 @@ if __name__ == "__main__":
         timeout_graceful_shutdown=30,
         loop="auto",
     )
-    sleep(100)
+    sleep(10)
+    print('系统启动成功')
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(('8.8.8.8', 80))
     ip = s.getsockname()[0]
+    print('本机IP地址为:', ip)
     s.close()
     baseurl = "http://" + ip + ":8008"
+    print('浏览器正在打开:', baseurl)
     webbrowser.open(baseurl)

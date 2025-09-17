@@ -128,6 +128,7 @@ jobs:
           macos-signed-app-name: Bomiot
           macos-app-name: Bomiot
           macos-app-version: 1.0.0
+          lto: yes
           # 包含的数据目录
           include-raw-dir: |
             main=main
