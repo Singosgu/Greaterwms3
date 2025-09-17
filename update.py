@@ -31,6 +31,7 @@ def run_update():
         
         # 更新目标目录（通常与安装目录相同）
         target_dir = app_install_dir
+        metadata_dir = os.path.join(app_install_dir, 'metadata')
 
         # 获取特定于当前系统的更新 URL
         target_base_url = get_update_server_url()
@@ -41,8 +42,9 @@ def run_update():
             app_name=app_name,              # 应用名称
             app_install_dir=app_install_dir,  # 应用安装目录
             target_dir=target_dir,            # 更新目标目录
-            current_version=version,          # 当前应用版本（需确保 bomiot.version 存在且格式正确）
-            metadata_dir=metadata_base_url,
+            current_version='1.0.0',          # 当前应用版本（需确保 bomiot.version 存在且格式正确）
+            metadata_dir=metadata_dir,
+            metadata_base_url=metadata_base_url,
             target_base_url=target_base_url
         )
         
