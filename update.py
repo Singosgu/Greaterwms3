@@ -1,9 +1,8 @@
 import platform
 import sys
-from pathlib import Path
+import os
 from tufup.client import Client
-from os import getcwd
-
+from bomiot import version  # 导入当前应用版本
 
 def get_update_server_url():
     """根据操作系统返回不同的更新 URL"""
@@ -16,73 +15,44 @@ def get_update_server_url():
     elif system == 'Linux':
         return f"{base_url}releases/linux/"
     else:
-        raise ValueError(f"不支持的操作系统: {system}")
+        raise ValueError(f"Unsupported operating system: {system}")
 
-
-def progress_callback(progress: float):
-    """更新下载进度回调函数"""
-    percentage = int(progress * 100)
-    # 简单的进度条显示
-    sys.stdout.write(f"\r下载进度: [{'#' * (percentage // 2)}{' ' * (50 - percentage // 2)}] {percentage}%")
-    sys.stdout.flush()
-    if percentage == 100:
-        print("\n下载完成，正在应用更新...")
-
-
-def run_update() -> bool:
-    """
-    执行更新检查和应用
-    返回值: 是否需要重启应用
-    """
+def run_update():
     try:
-        # 获取当前系统的更新服务器URL
+        # 获取应用安装目录（打包后可执行文件所在目录）
+        if getattr(sys, 'frozen', False):
+            # 打包后的环境（如 Nuitka 生成的可执行文件）
+            app_install_dir = os.path.dirname(sys.executable)
+        else:
+            # 开发环境（脚本运行目录）
+            app_install_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # 更新目标目录（通常与安装目录相同）
+        target_dir = app_install_dir
+
+        # 获取特定于当前系统的更新 URL
         target_base_url = get_update_server_url()
         metadata_base_url = "http://3.135.61.8:8008/media/update/metadata/"
         
-        # 配置更新相关目录（确保存在）
-        app_data_dir = Path(getcwd()) / "update_data"
-        metadata_dir = app_data_dir / "metadata"
-        targets_dir = app_data_dir / "targets"
-        app_data_dir.mkdir(exist_ok=True)
-        metadata_dir.mkdir(exist_ok=True)
-        targets_dir.mkdir(exist_ok=True)
-
-        # 实例化tufup客户端
+        # 实例化 tufup 客户端（补充必填参数）
         client = Client(
-            app_name="Bomiot",  # 应用名称，需与服务器端配置一致
-            current_version="1.0.0",  # 当前应用版本
+            app_install_dir=app_install_dir,  # 应用安装目录
+            target_dir=target_dir,            # 更新目标目录
+            current_version=version,          # 当前应用版本（需确保 bomiot.version 存在且格式正确）
             metadata_base_url=metadata_base_url,
-            target_base_url=target_base_url,
-            metadata_dir=metadata_dir,  # 本地存储元数据的目录
-            targets_dir=targets_dir,    # 本地存储更新文件的目录
-            verify=True,                # 启用更新验证（安全推荐）
-            timeout=30                  # 网络超时时间（秒）
+            target_base_url=target_base_url
         )
-
-        # 检查是否有可用更新
-        print(f"正在检查更新，当前版本: 1.0.0")
-        update_info = client.check_for_updates()
-
-        if not update_info:
-            print("当前已是最新版本，无需更新")
+        
+        # 检查更新并执行（根据 tufup 文档补充更新逻辑）
+        update_available = client.check_for_updates()
+        if update_available:
+            print("发现更新，正在下载并安装...")
+            client.download_and_apply_update()
+            return True  # 表示需要重启应用
+        else:
+            print("当前已是最新版本")
             return False
 
-        # 显示更新信息
-        latest_version = update_info['available_version']
-        print(f"发现新版本: {latest_version}")
-        if 'release_notes' in update_info:
-            print("更新内容:")
-            print(update_info['release_notes'])
-
-        # 下载并应用更新
-        client.download_and_apply_update(
-            progress_callback=progress_callback,
-            restart=False  # 不自动重启，由launcher控制
-        )
-
-        print(f"更新成功，已升级至版本: {latest_version}")
-        return True  # 需要重启
-
     except Exception as e:
-        print(f"\n自动更新失败: {str(e)}")
+        print(f"自动更新失败：{e}")
         return False

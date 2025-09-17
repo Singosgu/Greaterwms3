@@ -4,7 +4,6 @@ import sys
 import os
 import uvicorn
 import time
-from bomiot import version
 import socket
 import webbrowser
 from bomiot_token import encrypt_info
