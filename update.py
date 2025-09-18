@@ -18,6 +18,14 @@ def get_update_server_url():
     else:
         raise ValueError(f"Unsupported operating system: {system}")
 
+def progress_callback(total_bytes, downloaded_bytes):
+    """
+    当下载进行时，这个函数会被调用以更新进度。
+    """
+    if total_bytes > 0:
+        percent = int(downloaded_bytes * 100 / total_bytes)
+        print(f"下载中: {percent}% ({downloaded_bytes}/{total_bytes} bytes)", end="\r")
+
 def run_update():
     try:
         # 获取应用安装目录（打包后可执行文件所在目录）
@@ -51,8 +59,15 @@ def run_update():
         update_available = client.check_for_updates()
         if update_available:
             print("发现更新，正在下载并安装...")
-            client.download_and_apply_update()
-            return True  # 表示需要重启应用
+            result = client.update(progress=progress_callback)
+            if result:
+                new_version = result.get('new_version')
+                print(f"\n更新成功！已更新到版本：{new_version}")
+                print("请重新启动应用程序以应用更新。")
+                return True
+            else:
+                print("\n没有可用的新版本。")
+                return False
         else:
             print("当前已是最新版本")
             return False

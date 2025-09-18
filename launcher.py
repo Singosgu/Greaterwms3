@@ -15,24 +15,56 @@ from pathlib import Path
 from configparser import ConfigParser
 from update import run_update
 import tkinter as tk
+from PIL import Image, ImageTk
 
 
 if __name__ == "__main__":
     # 欢迎页
     splash = tk.Tk()
+    window_width = 640
+    window_height = 400
     x = int(splash.winfo_screenwidth() / 2 - splash.winfo_reqwidth() / 2)
     y = int(splash.winfo_screenheight() / 2 - splash.winfo_reqheight() / 2)
-    canvas = tk.Canvas(splash, width=640, height=400, bg='white', highlightthickness=0)
-    img = tk.PhotoImage(file=join(getcwd(), 'splash.png'))
-    canvas.create_image(0, 0, anchor=tk.NW, image=img)
+    canvas = tk.Canvas(splash, width=window_width, height=window_height, bg='white', highlightthickness=0)
     canvas.pack()
 
     splash.title("Welcome to Bomiot")
     splash.geometry(f'640x400+{x}+{y}')
     splash.overrideredirect(True)  # 无边框显示
-    
-    # 强制刷新窗口，确保splash在后续操作前显示
-    splash.update()
+    # 加载并缩放图片（保持长宽比）
+    try:
+        # 使用PIL加载图片
+        image_path = join(getcwd(), 'splash.png')
+        pil_img = Image.open(image_path)
+        
+        # 获取原始图片尺寸
+        img_width, img_height = pil_img.size
+        
+        # 计算缩放比例（保持长宽比）
+        scale_width = window_width / img_width
+        scale_height = window_height / img_height
+        scale = min(scale_width, scale_height)  # 取最小比例，确保图片完全显示在窗口内
+        
+        # 计算缩放后的尺寸
+        new_width = int(img_width * scale)
+        new_height = int(img_height * scale)
+        
+        # 缩放图片
+        resized_img = pil_img.resize((new_width, new_height), Image.Resampling.LANCZOS)  # 高质量缩放
+        img = ImageTk.PhotoImage(resized_img)
+        
+        # 计算图片居中位置
+        x_pos = (window_width - new_width) // 2
+        y_pos = (window_height - new_height) // 2
+        
+        # 在画布上显示图片（居中）
+        canvas.create_image(x_pos, y_pos, anchor=tk.NW, image=img)
+    except Exception as e:
+        print(f"图片加载失败: {e}")
+        # 显示错误文本
+        canvas.create_text(window_width/2, window_height/2, text="加载图片失败", font=("Arial", 12))
+
+
 
     # ================== 自动更新逻辑 ==================
     # 运行更新检查
@@ -41,9 +73,10 @@ if __name__ == "__main__":
     # 如果更新成功，退出当前进程以允许外部脚本或用户重启
     print('是否更新成功', needs_restart)
     if needs_restart:
-        splash.destroy()  # 更新时销毁欢迎页
         sys.exit(0)
-    
+
+    # 强制刷新窗口，确保splash在后续操作前显示
+    splash.update()
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
@@ -97,7 +130,6 @@ if __name__ == "__main__":
         print(f"Error during migration: {e}")
     
     # 保持欢迎页显示一段时间（原逻辑的10秒）
-    sleep(10)
     print('正在启动系统')
     
     # 在启动uvicorn前手动销毁欢迎页
@@ -124,13 +156,4 @@ if __name__ == "__main__":
         loop="auto",
     )
     
-    sleep(10)
-    print('系统启动成功')
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.connect(('8.8.8.8', 80))
-    ip = s.getsockname()[0]
-    print('本机IP地址为:', ip)
-    s.close()
-    baseurl = "http://" + ip + ":8008"
-    print('浏览器正在打开:', baseurl)
-    webbrowser.open(baseurl)
+    
