@@ -2,7 +2,6 @@ import platform
 import sys
 import os
 from tufup.client import Client
-from bomiot import version  # 导入当前应用版本
 
 app_name = "Bomiot"
 

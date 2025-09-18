@@ -77,6 +77,7 @@ jobs:
           # 包含的数据目录
           include-raw-dir: |
             main=main
+            metadata=metadata
           # 包含的包
           include-package: |
             bomiot
@@ -139,6 +140,7 @@ jobs:
           # 包含的数据目录
           include-raw-dir: |
             main=main
+            metadata=metadata
           # 包含的数据文件
           include-data-files: |
             setup.ini=setup.ini
@@ -203,6 +205,7 @@ jobs:
           # 包含的数据目录
           include-raw-dir: |
             main=main
+            metadata=metadata
           # 包含的数据文件
           include-data-files: |
             setup.ini=setup.ini

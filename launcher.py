@@ -1,7 +1,6 @@
 import os
 from time import sleep
 import sys
-import os
 import uvicorn
 import time
 import socket
@@ -12,7 +11,6 @@ from os.path import join, exists
 from os import getcwd
 import platform
 import importlib.resources
-from os.path import join
 from pathlib import Path
 from configparser import ConfigParser
 from update import run_update
@@ -25,13 +23,16 @@ if __name__ == "__main__":
     x = int(splash.winfo_screenwidth() / 2 - splash.winfo_reqwidth() / 2)
     y = int(splash.winfo_screenheight() / 2 - splash.winfo_reqheight() / 2)
     canvas = tk.Canvas(splash, width=640, height=400, bg='white', highlightthickness=0)
-    img = tk.PhotoImage(file=join(getcwd(), 'logo.png'))
+    img = tk.PhotoImage(file=join(getcwd(), 'splash.png'))
     canvas.create_image(0, 0, anchor=tk.NW, image=img)
     canvas.pack()
 
-    splash.title("Wlcome to Bomiot")
+    splash.title("Welcome to Bomiot")
     splash.geometry(f'640x400+{x}+{y}')
-    splash.overrideredirect(True)
+    splash.overrideredirect(True)  # 无边框显示
+    
+    # 强制刷新窗口，确保splash在后续操作前显示
+    splash.update()
 
     # ================== 自动更新逻辑 ==================
     # 运行更新检查
@@ -40,12 +41,15 @@ if __name__ == "__main__":
     # 如果更新成功，退出当前进程以允许外部脚本或用户重启
     print('是否更新成功', needs_restart)
     if needs_restart:
+        splash.destroy()  # 更新时销毁欢迎页
         sys.exit(0)
+    
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
     import django
     django.setup()
+    
     # 生成auth_key.py
     path = join(getcwd(), 'auth_key.py')
     if not exists(join(path)):
@@ -57,7 +61,6 @@ if __name__ == "__main__":
                 break
         with open(path, "w", encoding="utf-8") as f:
             f.write(f'KEY = "{key_code}"\n')
-        f.close()
 
     from django.core.management import call_command
     from django.apps import apps
@@ -93,10 +96,13 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during migration: {e}")
     
+    # 保持欢迎页显示一段时间（原逻辑的10秒）
     sleep(10)
     print('正在启动系统')
-    splash.after(1000, lambda: splash.destroy())
-    tk.mainloop()
+    
+    # 在启动uvicorn前手动销毁欢迎页
+    splash.destroy()
+
     # 启动 Django 开发服务器
     os.environ.setdefault("IS_LAN", "true")
     uvicorn.run(
@@ -117,6 +123,7 @@ if __name__ == "__main__":
         timeout_graceful_shutdown=30,
         loop="auto",
     )
+    
     sleep(10)
     print('系统启动成功')
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
