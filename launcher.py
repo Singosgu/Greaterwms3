@@ -21,15 +21,15 @@ from PIL import Image, ImageTk
 if __name__ == "__main__":
     # 欢迎页
     splash = tk.Tk()
-    window_width = 640
-    window_height = 400
+    window_width = 675
+    window_height = 329
     x = int(splash.winfo_screenwidth() / 2 - splash.winfo_reqwidth() / 2)
     y = int(splash.winfo_screenheight() / 2 - splash.winfo_reqheight() / 2)
     canvas = tk.Canvas(splash, width=window_width, height=window_height, bg='white', highlightthickness=0)
     canvas.pack()
 
     splash.title("Welcome to Bomiot")
-    splash.geometry(f'640x400+{x}+{y}')
+    splash.geometry(f'675x329+{x}+{y}')
     splash.overrideredirect(True)  # 无边框显示
     # 加载并缩放图片（保持长宽比）
     try:
