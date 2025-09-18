@@ -137,6 +137,14 @@ if __name__ == "__main__":
 
     # 启动 Django 开发服务器
     os.environ.setdefault("IS_LAN", "true")
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    s.connect(('8.8.8.8', 80))
+    ip = s.getsockname()[0]
+    print('本机IP地址为:', ip)
+    s.close()
+    baseurl = "http://" + ip + ":8008"
+    print('浏览器正在打开:', baseurl)
+    webbrowser.open(baseurl)
     uvicorn.run(
         "bomiot_asgi:application",
         host='0.0.0.0',
