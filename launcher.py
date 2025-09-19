@@ -25,8 +25,8 @@ if __name__ == "__main__":
     splash = tk.Tk()
     window_width = 675
     window_height = 329
-    x = int(splash.winfo_screenwidth() / 2 - splash.winfo_reqwidth() / 2)
-    y = int(splash.winfo_screenheight() / 2 - splash.winfo_reqheight() / 2)
+    x = int(splash.winfo_screenwidth() / 2 - window_width / 2)
+    y = int(splash.winfo_screenheight() / 2 - window_height / 2)
     canvas = tk.Canvas(splash, width=window_width, height=window_height, bg='white', highlightthickness=0)
     canvas.pack()
 
@@ -65,8 +65,6 @@ if __name__ == "__main__":
         print(f"图片加载失败: {e}")
         # 显示错误文本
         canvas.create_text(window_width/2, window_height/2, text="加载图片失败", font=("Arial", 12))
-
-
 
     # ================== 自动更新逻辑 ==================
     # 运行更新检查
@@ -134,9 +132,6 @@ if __name__ == "__main__":
     # 保持欢迎页显示一段时间（原逻辑的10秒）
     print('正在启动系统')
     
-    # 在启动uvicorn前手动销毁欢迎页
-    splash.destroy()
-
     # 启动 Django 开发服务器
     os.environ.setdefault("IS_LAN", "true")
     print('系统启动成功')
@@ -149,12 +144,22 @@ if __name__ == "__main__":
     print('浏览器正在打开:', baseurl)
     def run_server():
         while True:
-            response = requests.get(url=baseurl, timeout=1)
-            print(response.status_code)
-            sleep(1)
-            continue
+            try:
+                response = requests.get(url=baseurl, timeout=1)
+                print(response.status_code)
+                # 如果成功，跳出循环或执行其他操作
+                webbrowser.open(baseurl)
+                break 
+            except requests.exceptions.ReadTimeout:
+                print("服务器尚未准备好，正在重试...")
+                sleep(1)
+                continue
     run_server_thread = threading.Thread(target=run_server, daemon=True)
     run_server_thread.start()
+
+    # 在启动uvicorn前手动销毁欢迎页
+    splash.destroy()
+
     uvicorn.run(
             "bomiot_asgi:application",
             host='0.0.0.0',
