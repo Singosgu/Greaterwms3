@@ -17,6 +17,7 @@ from configparser import ConfigParser
 from update import run_update
 import tkinter as tk
 from PIL import Image, ImageTk
+import requests
 
 
 if __name__ == "__main__":
@@ -147,7 +148,11 @@ if __name__ == "__main__":
     baseurl = "http://" + ip + ":8008"
     print('浏览器正在打开:', baseurl)
     def run_server():
-        webbrowser.open(baseurl)
+        while True:
+            response = requests.get(url=baseurl, timeout=1)
+            print(response.status_code)
+            sleep(1)
+            continue
     run_server_thread = threading.Thread(target=run_server, daemon=True)
     run_server_thread.start()
     uvicorn.run(
