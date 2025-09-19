@@ -138,24 +138,6 @@ if __name__ == "__main__":
 
     # 启动 Django 开发服务器
     os.environ.setdefault("IS_LAN", "true")
-    uvicorn.run(
-        "bomiot_asgi:application",
-        host='0.0.0.0',
-        port=8008,
-        workers=1,
-        log_level="info",
-        uds=None,
-        ssl_keyfile=None,
-        ssl_certfile=None,
-        proxy_headers="store_true",
-        http="httptools",
-        server_header=False,
-        limit_concurrency=1000,
-        backlog=128,
-        timeout_keep_alive=5,
-        timeout_graceful_shutdown=30,
-        loop="auto",
-    )
     print('系统启动成功')
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.connect(('8.8.8.8', 80))
@@ -164,7 +146,28 @@ if __name__ == "__main__":
     s.close()
     baseurl = "http://" + ip + ":8008"
     print('浏览器正在打开:', baseurl)
-    webbrowser.open(baseurl)
+    def run_server():
+        webbrowser.open(baseurl)
+    run_server_thread = threading.Thread(target=run_server, daemon=True)
+    run_server_thread.start()
+    uvicorn.run(
+            "bomiot_asgi:application",
+            host='0.0.0.0',
+            port=8008,
+            workers=1,
+            log_level="info",
+            uds=None,
+            ssl_keyfile=None,
+            ssl_certfile=None,
+            proxy_headers="store_true",
+            http="httptools",
+            server_header=False,
+            limit_concurrency=1000,
+            backlog=128,
+            timeout_keep_alive=5,
+            timeout_graceful_shutdown=30,
+            loop="auto",
+        )
     
     
     
