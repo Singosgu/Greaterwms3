@@ -147,7 +147,7 @@ if __name__ == "__main__":
             try:
                 response = requests.get(url=baseurl, timeout=1)
                 print(response.status_code)
-                # 如果成功，跳出循环或执行其他操作
+                sleep(1)
                 webbrowser.open(baseurl)
                 break 
             except requests.exceptions.ReadTimeout:

@@ -68,6 +68,7 @@ jobs:
           product-version: ${{ env.BASE_VERSION }}
           copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           windows-icon-from-ico: logo.ico
+          windows-console-mode: disable
           lto: yes
           enable-plugins: tk-inter
           # 包含的数据文件
