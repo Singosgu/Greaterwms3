@@ -130,17 +130,11 @@ if __name__ == "__main__":
     def run_server():
         while True:
             try:
-                response = requests.get(url=baseurl + '/test/', timeout=1)
+                response = requests.get(url=baseurl, timeout=1)
                 print(response.status_code)
-                if response.status_code == 200:
-                    print("服务器尚未准备好，正在重试...")
-                    sleep(1)
-                    webbrowser.open(baseurl)
-                    break
-                else:
-                    print("服务器尚未准备好，正在重试...")
-                    sleep(1)
-                    continue
+                sleep(2)
+                webbrowser.open(baseurl)
+                break 
             except requests.exceptions.ReadTimeout:
                 print("服务器尚未准备好，正在重试...")
                 sleep(1)
