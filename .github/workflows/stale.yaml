@@ -2,7 +2,7 @@ name: Nuitka Build
 
 env:
   APP_NAME: "Bomiot"  # 应用名称（全局共享）
-  BASE_VERSION: "1.0.0"  # 基础版本号（全局共享）
+  BASE_VERSION: "1.0.1"  # 基础版本号（全局共享）
 
 
 on:

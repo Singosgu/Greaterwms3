@@ -21,7 +21,7 @@ import requests
 from tufup.client import Client
 
 app_name = "Bomiot"
-version = "1.0.0"
+version = "1.0.1"
 
 def get_update_server_url():
     """根据操作系统返回不同的更新 URL"""
@@ -112,6 +112,7 @@ if __name__ == "__main__":
     center_x = int(screen_width / 2 - window_width / 2)
     center_y = int(screen_height / 2 - window_height / 2)
     update_root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+    update_root.overrideredirect(True)  # 无边框显示
     update_root.resizable(False, False)
 
     status_label = tk.Label(update_root, text="正在初始化...", pady=10)
