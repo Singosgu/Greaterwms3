@@ -14,13 +14,132 @@ import platform
 import importlib.resources
 from pathlib import Path
 from configparser import ConfigParser
-from update import run_update
 import tkinter as tk
+from tkinter import ttk
 from PIL import Image, ImageTk
 import requests
+from tufup.client import Client
+
+app_name = "Bomiot"
+version = "1.0.0"
+
+def get_update_server_url():
+    """根据操作系统返回不同的更新 URL"""
+    system = platform.system()
+    base_url = "http://3.135.61.8:8008/media/update/"
+    if system == 'Windows':
+        return f"{base_url}releases/windows/"
+    elif system == 'Darwin':  # macOS
+        return f"{base_url}releases/macos/"
+    elif system == 'Linux':
+        return f"{base_url}releases/linux/"
+    else:
+        raise ValueError(f"Unsupported operating system: {system}")
+
+def progress_callback(progress_bar, status_label, total_bytes, downloaded_bytes):
+    if total_bytes > 0:
+        percent = int(downloaded_bytes * 100 / total_bytes)
+        progress_bar['value'] = percent
+        status_label.config(text=f"下载中: {percent}% ({downloaded_bytes}/{total_bytes} bytes)")
+        progress_bar.update()
+        status_label.update()
+
+def run_update(progress_bar, status_label):
+    try:
+        status_label.config(text="正在检查更新...")
+        # 获取应用安装目录（打包后可执行文件所在目录）
+        if getattr(sys, 'frozen', False):
+            # 打包后的环境（如 Nuitka 生成的可执行文件）
+            app_install_dir = os.path.dirname(sys.executable)
+        else:
+            # 开发环境（脚本运行目录）
+            app_install_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # 更新目标目录（通常与安装目录相同）
+        target_dir = app_install_dir
+        metadata_dir = os.path.join(app_install_dir, 'metadata')
+
+        # 获取特定于当前系统的更新 URL
+        target_base_url = get_update_server_url()
+        metadata_base_url = "http://3.135.61.8:8008/media/update/metadata/"
+        
+        # 实例化 tufup 客户端（补充必填参数）
+        client = Client(
+            app_name=app_name,              # 应用名称
+            app_install_dir=app_install_dir,  # 应用安装目录
+            target_dir=target_dir,            # 更新目标目录
+            current_version=version,          # 当前应用版本（需确保 bomiot.version 存在且格式正确）
+            metadata_dir=metadata_dir,
+            metadata_base_url=metadata_base_url,
+            target_base_url=target_base_url
+        )
+        
+        # 检查更新并执行（根据 tufup 文档补充更新逻辑）
+        update_available = client.check_for_updates()
+        if update_available:
+            status_label.config(text="发现更新，正在下载并安装...")
+            # 传递一个 lambda 函数作为回调，将进度条和标签传递进去
+            result = client.update(progress=lambda total, downloaded: progress_callback(progress_bar, status_label, total, downloaded))
+            if result:
+                new_version = result.get('new_version')
+                status_label.config(text=f"更新成功！已更新到版本：{new_version}")
+                print(f"\n更新成功！已更新到版本：{new_version}")
+                print("请重新启动应用程序以应用更新。")
+                return True
+            else:
+                status_label.config(text="没有可用的新版本。")
+                print("\n没有可用的新版本。")
+                return False
+        else:
+            status_label.config(text="当前已是最新版本。")
+            print("当前已是最新版本")
+            return False
+
+    except Exception as e:
+        status_label.config(text=f"自动更新失败：{e}")
+        print(f"自动更新失败：{e}")
+        return False
 
 
 if __name__ == "__main__":
+    # ================== 自动更新逻辑 ==================
+    update_root = tk.Tk()
+    update_root.title("自动更新中...")
+    window_width = 400
+    window_height = 120
+    screen_width = update_root.winfo_screenwidth()
+    screen_height = update_root.winfo_screenheight()
+    center_x = int(screen_width / 2 - window_width / 2)
+    center_y = int(screen_height / 2 - window_height / 2)
+    update_root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+    update_root.resizable(False, False)
+
+    status_label = tk.Label(update_root, text="正在初始化...", pady=10)
+    status_label.pack()
+
+    progress_bar = ttk.Progressbar(update_root, orient="horizontal", length=350, mode="determinate")
+    progress_bar.pack(pady=5)
+
+    # 启动一个新线程来执行更新任务，以免阻塞 UI
+    update_thread = threading.Thread(target=lambda: run_update(progress_bar, status_label), daemon=True)
+    update_thread.start()
+
+    # 等待更新线程完成
+    while update_thread.is_alive():
+        update_root.update()
+        time.sleep(0.1)
+
+    needs_restart = run_update(progress_bar, status_label)
+    
+    # 销毁更新窗口
+    update_root.destroy()
+
+    # 如果更新成功，退出当前进程以允许外部脚本或用户重启
+    print('是否更新成功', needs_restart)
+    if needs_restart:
+        print("更新完成，正在重启...")
+        os.execv(sys.executable, ['python'] + sys.argv)
+    
     # 欢迎页
     splash = tk.Tk()
     window_width = 675
@@ -65,15 +184,6 @@ if __name__ == "__main__":
         print(f"图片加载失败: {e}")
         # 显示错误文本
         canvas.create_text(window_width/2, window_height/2, text="加载图片失败", font=("Arial", 12))
-
-    # ================== 自动更新逻辑 ==================
-    # 运行更新检查
-    needs_restart = run_update()
-    
-    # 如果更新成功，退出当前进程以允许外部脚本或用户重启
-    print('是否更新成功', needs_restart)
-    if needs_restart:
-        sys.exit(0)
 
     # 强制刷新窗口，确保splash在后续操作前显示
     splash.update()
