@@ -21,7 +21,10 @@ if __name__ == "__main__":
     window_height = 329
     x = int(splash.winfo_screenwidth() / 2 - window_width / 2)
     y = int(splash.winfo_screenheight() / 2 - window_height / 2)
-    canvas = tk.Canvas(splash, width=window_width, height=window_height, bg='white', highlightthickness=0)
+
+    canvas = tk.Canvas(splash, width=window_width, height=window_height, highlightthickness=0)
+    canvas.configure(bg='')
+    splash.wm_attributes('-transparentcolor', '')
     canvas.pack()
 
     splash.title("Welcome to Bomiot")
