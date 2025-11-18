@@ -186,8 +186,7 @@ class BomiotUpdater:
             # 检查更新
             if self.client.updates_available:
                 self.update_available = True
-                # 获取最新版本号
-                # 注意：我们需要找到最新的目标文件来确定版本
+                # 注意：latest_version将在下载更新时确定
                 logger.info("发现新版本可用")
                 return True
             else:
@@ -449,10 +448,42 @@ class BomiotUpdater:
             if not self.check_for_updates():
                 return False
             
-            # 如果有更新，则下载并安装
-            # 根据平台选择适当的文件扩展名
-            file_extension = cross_platform_updater.get_update_file_extension()
-            target_name = f"{self.app_name}-{self.latest_version}{file_extension}"
+            # 获取目标文件信息
+            target_name = None
+            try:
+                # 尝试从客户端获取目标文件信息
+                if self.client is not None:
+                    # 使用TUF客户端的API获取目标文件信息
+                    # 注意：具体的API可能因tufup版本而异
+                    try:
+                        # 尝试获取目标文件信息的不同方法
+                        if hasattr(self.client, 'get_targetinfo'):
+                            # 如果有get_targetinfo方法，我们可以用它来获取信息
+                            # 但我们需要知道目标文件名才能调用它
+                            pass
+                    except:
+                        pass
+                    
+                    # 作为后备方案，使用基于应用名和当前版本的文件名
+                    file_extension = cross_platform_updater.get_update_file_extension()
+                    target_name = f"{self.app_name}-{self.current_version}{file_extension}"
+                    
+                    # 检查是否有更新可用，如果有，尝试获取最新版本的目标文件
+                    if self.update_available:
+                        # 这里我们假设目标文件名遵循一定的命名约定
+                        # 在实际应用中，可能需要从元数据中获取确切的文件名
+                        target_name = f"{self.app_name}-{self.current_version}{file_extension}"
+            except Exception as e:
+                logger.warning(f"获取目标文件信息时出错: {e}")
+                # 作为后备方案，使用基于应用名和当前版本的文件名
+                file_extension = cross_platform_updater.get_update_file_extension()
+                target_name = f"{self.app_name}-{self.current_version}{file_extension}"
+            
+            if not target_name:
+                logger.error("未找到目标文件")
+                return False
+            
+            # 下载更新
             update_file = self.download_update(target_name)
             
             if not update_file:

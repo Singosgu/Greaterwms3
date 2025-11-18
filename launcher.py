@@ -59,6 +59,7 @@ encrypt_info = default_encrypt_info
 def check_and_apply_updates():
     """检查并应用更新"""
     if not UPDATER_AVAILABLE or BomiotUpdater is None:
+        print("更新模块不可用，跳过更新检查")
         return False
     
     try:
@@ -67,6 +68,7 @@ def check_and_apply_updates():
         
         # 获取动态更新服务器地址（如果有的话）
         dynamic_url = updater.get_dynamic_update_server_url(UPDATE_SERVER_URL)
+        print(f"使用更新服务器地址: {dynamic_url}")
         
         # 如果启用了自动更新，则执行自动更新
         if ENABLE_AUTO_UPDATE:
@@ -74,13 +76,21 @@ def check_and_apply_updates():
             success = updater.auto_update(dynamic_url)
             if success:
                 print("更新完成，请重启应用程序")
+                sleep(1000)
                 return True
             else:
                 print("无可用更新或更新失败")
+                sleep(1000)
                 return False
+        else:
+            print("自动更新已禁用")
+            sleep(1000)
         return False
     except Exception as e:
         print(f"检查更新时出错: {e}")
+        import traceback
+        traceback.print_exc()
+        sleep(1)
         return False
 
 if __name__ == "__main__":
@@ -90,23 +100,33 @@ if __name__ == "__main__":
         # 如果应用了更新，自动重启程序
         print("程序已更新，正在自动重启...")
         # 使用跨平台重启功能
+        restart_success = False
         try:
             from main.updater import BomiotUpdater
-            updater = BomiotUpdater()
-            if updater.restart_application():
+            updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
+            restart_success = updater.restart_application()
+            if restart_success:
                 print("重启命令已发送")
             else:
                 print("重启失败，使用备用方法")
-                # 备用重启方法
+        except Exception as e:
+            print(f"重启时出错: {e}")
+            import traceback
+            traceback.print_exc()
+        
+        # 如果主重启方法失败，使用备用重启方法
+        if not restart_success:
+            try:
                 import subprocess
                 import sys
                 subprocess.Popen([sys.executable] + sys.argv)
-        except Exception as e:
-            print(f"重启时出错: {e}")
-            # 最后的备用重启方法
-            import subprocess
-            import sys
-            subprocess.Popen([sys.executable] + sys.argv)
+                print("备用重启方法已执行")
+            except Exception as e:
+                print(f"备用重启方法也失败了: {e}")
+                import traceback
+                traceback.print_exc()
+        
+        # 退出当前进程
         exit(0)
 
     # 欢迎页
