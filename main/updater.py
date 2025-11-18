@@ -22,14 +22,13 @@ from tufup.utils import input_bool
 from tuf.api._payload import TargetFile
 
 # 导入更新配置
-from .update_config import DYNAMIC_UPDATE_CONFIG_FILE
+from .update_config import DYNAMIC_UPDATE_CONFIG_FILE, APP_NAME, CURRENT_VERSION
 
 # 配置日志
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 # 定义常量
-APP_NAME = "bomiot"
 CURRENT_DIR = Path(__file__).parent.parent
 UPDATE_DIR = CURRENT_DIR / "updates"
 CACHE_DIR = CURRENT_DIR / "cache"
@@ -44,7 +43,7 @@ for directory in [UPDATE_DIR, CACHE_DIR, METADATA_DIR, TARGETS_DIR]:
 class BomiotUpdater:
     """Bomiot 增量更新器"""
 
-    def __init__(self, app_name: str = APP_NAME, current_version: str = "0.0.1"):
+    def __init__(self, app_name: str = APP_NAME, current_version: str = CURRENT_VERSION):
         self.app_name = app_name
         self.current_version = current_version
         self.client = None  # TUF客户端实例
@@ -77,18 +76,32 @@ class BomiotUpdater:
             logger.error(f"读取动态更新配置时出错: {e}")
             return default_url
 
-    def save_dynamic_update_server_url(self, new_url: str):
+    def save_dynamic_update_server_url(self, new_url: str, app_name: Optional[str] = None, current_version: Optional[str] = None):
         """
-        保存动态更新服务器地址
+        保存动态更新服务器地址和应用信息
         
         Args:
             new_url: 新的服务器地址
+            app_name: 应用名称（可选）
+            current_version: 当前版本号（可选）
         """
         try:
-            config = {'update_server_url': new_url}
+            # 读取现有配置（如果存在）
+            config = {}
+            if DYNAMIC_UPDATE_CONFIG_FILE.exists():
+                with open(DYNAMIC_UPDATE_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                    config = json.load(f)
+            
+            # 更新配置
+            config['update_server_url'] = new_url
+            if app_name is not None:
+                config['app_name'] = app_name
+            if current_version is not None:
+                config['current_version'] = current_version
+                
             with open(DYNAMIC_UPDATE_CONFIG_FILE, 'w', encoding='utf-8') as f:
                 json.dump(config, f, ensure_ascii=False, indent=2)
-            logger.info(f"动态更新服务器地址已保存: {new_url}")
+            logger.info(f"动态更新配置已保存: {new_url}")
         except Exception as e:
             logger.error(f"保存动态更新配置时出错: {e}")
 
@@ -444,10 +457,17 @@ class BomiotUpdater:
                         import json
                         config_data = json.load(config_file)
                         new_server_url = config_data.get('update_server_url')
+                        new_app_name = config_data.get('app_name')
+                        new_version = config_data.get('current_version')
+                        
                         if new_server_url:
-                            # 保存新的服务器地址
-                            self.save_dynamic_update_server_url(new_server_url)
-                            logger.info(f"从更新包中获取新的服务器地址: {new_server_url}")
+                            # 保存新的服务器地址和应用信息
+                            self.save_dynamic_update_server_url(
+                                new_url=new_server_url,
+                                app_name=new_app_name,
+                                current_version=new_version
+                            )
+                            logger.info(f"从更新包中获取新的配置: server={new_server_url}, app={new_app_name}, version={new_version}")
         except Exception as e:
             logger.error(f"检查更新包中的服务器配置时出错: {e}")
 
@@ -491,7 +511,7 @@ def create_update_repository(repo_dir: Path, app_name: str = APP_NAME):
 # 示例用法
 if __name__ == "__main__":
     # 创建更新器实例
-    updater = BomiotUpdater(current_version="0.0.1")
+    updater = BomiotUpdater()
     
     # 示例：检查更新
     # updater.auto_update("http://your-update-server.com/repository")

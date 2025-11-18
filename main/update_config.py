@@ -3,11 +3,8 @@ Bomiot 更新配置文件
 """
 
 import os
+import json
 from pathlib import Path
-
-# 应用信息
-APP_NAME = "bomiot"
-CURRENT_VERSION = "0.0.1"
 
 # 本地路径配置
 BASE_DIR = Path(__file__).parent.parent
@@ -22,8 +19,24 @@ DYNAMIC_UPDATE_CONFIG_FILE = CACHE_DIR / "dynamic_update_config.json"
 for directory in [UPDATE_DIR, CACHE_DIR, BACKUP_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
+# 从 server_config.json 读取配置
+SERVER_CONFIG_FILE = BASE_DIR / "main" / "server_config.json"
+APP_NAME = "Bomiot"
+CURRENT_VERSION = "1.1.1"
+UPDATE_SERVER_URL = "http://3.135.61.8:8008/media/"
+
+try:
+    if SERVER_CONFIG_FILE.exists():
+        with open(SERVER_CONFIG_FILE, 'r', encoding='utf-8') as f:
+            server_config = json.load(f)
+            APP_NAME = server_config.get('app_name', APP_NAME)
+            CURRENT_VERSION = server_config.get('current_version', CURRENT_VERSION)
+            UPDATE_SERVER_URL = server_config.get('update_server_url', UPDATE_SERVER_URL)
+except Exception as e:
+    print(f"读取 server_config.json 时出错: {e}")
+
 # 更新服务器配置
-UPDATE_SERVER_URL = os.getenv("BOMIOT_UPDATE_URL", "http://3.135.61.8:8008/media/")
+UPDATE_SERVER_URL = os.getenv("BOMIOT_UPDATE_URL", UPDATE_SERVER_URL)
 UPDATE_CHECK_INTERVAL = int(os.getenv("BOMIOT_UPDATE_INTERVAL", "360"))  # 默认1小时检查一次
 
 # 更新策略配置

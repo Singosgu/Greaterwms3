@@ -9,19 +9,40 @@ from os import getcwd
 import tkinter as tk
 from PIL import Image, ImageTk
 import requests
+import json
 
-# 定义默认值
-APP_NAME = "Bomiot"
-CURRENT_VERSION = "1.1.1"
-UPDATE_SERVER_URL = "http://3.135.61.8:8008/media/update"
-ENABLE_AUTO_UPDATE = True
+# 导入统一配置
+from main.update_config import APP_NAME as CONFIG_APP_NAME, CURRENT_VERSION as CONFIG_CURRENT_VERSION, UPDATE_SERVER_URL, ENABLE_AUTO_UPDATE
+
+# 使用配置文件中的默认值
+APP_NAME = CONFIG_APP_NAME
+CURRENT_VERSION = CONFIG_CURRENT_VERSION
+
+# 尝试从动态配置文件中读取应用信息
+def load_dynamic_app_info():
+    """从动态配置文件中加载应用信息"""
+    global APP_NAME, CURRENT_VERSION
+    try:
+        # 导入更新配置以获取统一的配置文件路径
+        from main.update_config import DYNAMIC_UPDATE_CONFIG_FILE
+        if DYNAMIC_UPDATE_CONFIG_FILE.exists():
+            with open(DYNAMIC_UPDATE_CONFIG_FILE, 'r', encoding='utf-8') as f:
+                config = json.load(f)
+                if 'app_name' in config:
+                    APP_NAME = config['app_name']
+                if 'current_version' in config:
+                    CURRENT_VERSION = config['current_version']
+    except Exception as e:
+        print(f"读取动态配置文件时出错: {e}")
+
+# 在导入更新模块之前加载动态配置
+load_dynamic_app_info()
 
 # 导入更新模块
 UPDATER_AVAILABLE = False
 BomiotUpdater = None
 try:
     from main.updater import BomiotUpdater
-    from main.update_config import APP_NAME, CURRENT_VERSION, UPDATE_SERVER_URL, ENABLE_AUTO_UPDATE
     UPDATER_AVAILABLE = True
 except ImportError:
     print("警告: 更新模块不可用")

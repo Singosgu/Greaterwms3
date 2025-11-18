@@ -17,13 +17,14 @@ import tempfile
 import shutil
 import hashlib
 
+# 导入统一的配置
+from .update_config import APP_NAME, CURRENT_VERSION
+
 # 配置日志
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # 定义常量
-APP_NAME = "Bomiot"
-CURRENT_VERSION = "1.1.1"
 REPO_DIR = Path("update_repo")
 CLIENT_DIR = Path("update_client")
 
