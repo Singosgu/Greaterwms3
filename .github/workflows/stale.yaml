@@ -378,9 +378,14 @@ jobs:
                       print(f"targets.json包含以下目标文件: {list(targets.keys())}")
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
+                          length_str = "length"
+                          unknown_str = "未知"
+                          hashes_str = "hashes"
                           print(f"  文件: {filename}")
-                          print(f"    大小: {file_info.get(\"length\", \"未知\")}")
-                          print(f"    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}")
+                          print(f"    大小: {file_info.get(length_str, unknown_str)}")
+                          hashes_values = list(file_info.get(hashes_str, {}).values())
+                          hash_value = hashes_values[0] if hashes_values else unknown_str
+                          print(f"    哈希: {hash_value}")
                   else:
                       print("错误: targets.json不包含目标文件信息")
                       # 打印完整的targets.json内容用于调试
@@ -441,9 +446,14 @@ jobs:
                       print(f"targets.json包含以下目标文件: {list(targets.keys())}")
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
+                          length_str = "length"
+                          unknown_str = "未知"
+                          hashes_str = "hashes"
                           print(f"  文件: {filename}")
-                          print(f"    大小: {file_info.get(\"length\", \"未知\")}")
-                          print(f"    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}")
+                          print(f"    大小: {file_info.get(length_str, unknown_str)}")
+                          hashes_values = list(file_info.get(hashes_str, {}).values())
+                          hash_value = hashes_values[0] if hashes_values else unknown_str
+                          print(f"    哈希: {hash_value}")
                   else:
                       print("错误: targets.json不包含目标文件信息")
                       # 打印完整的targets.json内容用于调试
