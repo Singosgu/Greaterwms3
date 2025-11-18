@@ -22,6 +22,7 @@ def build_exe():
         "--include-data-dir=dbs=dbs",  # 包含数据库目录
         "--include-data-dir=logs=logs",  # 包含日志目录
         "--include-data-dir=main=main",  # 包含main目录
+        "--include-data-dir=updates=updates",  # 包含更新目录（TUF仓库）
         "--include-data-file=setup.ini=setup.ini",  # 包含setup.ini文件
         # "--verbose",  # 输出详细信息
         "--lto=yes",  # 开启链接时优化

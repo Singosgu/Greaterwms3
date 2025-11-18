@@ -4,6 +4,7 @@ Bomiot 更新配置文件
 
 import os
 import json
+import platform
 from pathlib import Path
 
 # 本地路径配置
@@ -19,6 +20,21 @@ DYNAMIC_UPDATE_CONFIG_FILE = CACHE_DIR / "dynamic_update_config.json"
 for directory in [UPDATE_DIR, CACHE_DIR, BACKUP_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
+# 获取当前平台
+def get_platform_name():
+    """获取当前平台名称"""
+    system = platform.system().lower()
+    if system == 'windows':
+        return 'windows'
+    elif system == 'darwin':
+        return 'mac'
+    elif system == 'linux':
+        return 'linux'
+    else:
+        return 'windows'  # 默认为Windows
+
+CURRENT_PLATFORM = get_platform_name()
+
 # 从 server_config.json 读取配置
 SERVER_CONFIG_FILE = BASE_DIR / "main" / "server_config.json"
 APP_NAME = "Bomiot"
@@ -31,7 +47,14 @@ try:
             server_config = json.load(f)
             APP_NAME = server_config.get('app_name', APP_NAME)
             CURRENT_VERSION = server_config.get('current_version', CURRENT_VERSION)
-            UPDATE_SERVER_URL = server_config.get('update_server_url', UPDATE_SERVER_URL)
+            
+            # 根据平台获取特定的更新服务器URL
+            platform_specific_urls = server_config.get('platform_specific_urls', {})
+            if CURRENT_PLATFORM in platform_specific_urls:
+                UPDATE_SERVER_URL = platform_specific_urls[CURRENT_PLATFORM]
+            else:
+                # 如果没有平台特定的URL，则使用通用URL
+                UPDATE_SERVER_URL = server_config.get('update_server_url', UPDATE_SERVER_URL)
 except Exception as e:
     print(f"读取 server_config.json 时出错: {e}")
 

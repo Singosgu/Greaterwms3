@@ -4,25 +4,30 @@ Bomiot 增量自动更新模块
 """
 
 import os
-import sys
 import logging
 import shutil
-import tempfile
 import hashlib
 import json
+import platform
+import subprocess
+import sys
 from pathlib import Path
-from typing import Optional, Dict, Any, Union, cast
+from typing import Optional
 import bsdiff4
 import requests
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 from tufup.client import Client
-from tufup.repo import Repository
-from tufup.utils import input_bool
-from tuf.api._payload import TargetFile
+
 
 # 导入更新配置
 from .update_config import DYNAMIC_UPDATE_CONFIG_FILE, APP_NAME, CURRENT_VERSION
+
+# 导入跨平台更新支持
+from .cross_platform_updater import CrossPlatformUpdater
+
+# 导入TUF仓库支持
+from tufup.repo import Repository
 
 # 配置日志
 logger = logging.getLogger(__name__)
@@ -39,6 +44,9 @@ TARGETS_DIR = UPDATE_DIR / "targets"
 for directory in [UPDATE_DIR, CACHE_DIR, METADATA_DIR, TARGETS_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
 
+# 创建跨平台更新器实例
+cross_platform_updater = CrossPlatformUpdater()
+
 
 class BomiotUpdater:
     """Bomiot 增量更新器"""
@@ -50,6 +58,7 @@ class BomiotUpdater:
         self.observer = None  # 文件监视器实例
         self.update_available = False
         self.latest_version = current_version
+        self.platform_info = cross_platform_updater.get_platform_info()
 
     def get_dynamic_update_server_url(self, default_url: str) -> str:
         """
@@ -62,6 +71,9 @@ class BomiotUpdater:
             str: 动态服务器地址或默认地址
         """
         try:
+            # 首先尝试获取平台特定的URL
+            platform_specific_url = self._get_platform_specific_url(default_url)
+            
             if DYNAMIC_UPDATE_CONFIG_FILE.exists():
                 with open(DYNAMIC_UPDATE_CONFIG_FILE, 'r', encoding='utf-8') as f:
                     config = json.load(f)
@@ -69,12 +81,32 @@ class BomiotUpdater:
                     if dynamic_url:
                         logger.info(f"使用动态更新服务器地址: {dynamic_url}")
                         return dynamic_url
-            # 如果没有动态配置文件，使用默认地址
-            logger.info(f"使用默认更新服务器地址: {default_url}")
-            return default_url
+            # 如果没有动态配置文件，使用平台特定的默认地址
+            logger.info(f"使用平台特定的更新服务器地址: {platform_specific_url}")
+            return platform_specific_url
         except Exception as e:
             logger.error(f"读取动态更新配置时出错: {e}")
             return default_url
+    
+    def _get_platform_specific_url(self, base_url: str) -> str:
+        """
+        获取平台特定的更新服务器URL
+        
+        Args:
+            base_url: 基础URL
+            
+        Returns:
+            str: 平台特定的URL
+        """
+        try:
+            # 使用跨平台更新器获取平台特定的URL
+            return cross_platform_updater.get_platform_specific_url(base_url)
+        except Exception as e:
+            logger.error(f"获取平台特定URL时出错: {e}")
+            # 如果无法获取平台特定的URL，则返回基础URL加上平台路径
+            if not base_url.endswith('/'):
+                base_url += '/'
+            return f"{base_url}{self.platform_info['platform_name']}/"
 
     def save_dynamic_update_server_url(self, new_url: str, app_name: Optional[str] = None, current_version: Optional[str] = None):
         """
@@ -418,7 +450,9 @@ class BomiotUpdater:
                 return False
             
             # 如果有更新，则下载并安装
-            target_name = f"{self.app_name}-{self.latest_version}.zip"
+            # 根据平台选择适当的文件扩展名
+            file_extension = cross_platform_updater.get_update_file_extension()
+            target_name = f"{self.app_name}-{self.latest_version}{file_extension}"
             update_file = self.download_update(target_name)
             
             if not update_file:
@@ -470,6 +504,15 @@ class BomiotUpdater:
                             logger.info(f"从更新包中获取新的配置: server={new_server_url}, app={new_app_name}, version={new_version}")
         except Exception as e:
             logger.error(f"检查更新包中的服务器配置时出错: {e}")
+
+    def restart_application(self) -> bool:
+        """
+        重启应用程序（跨平台支持）
+        
+        Returns:
+            bool: 重启是否成功启动
+        """
+        return cross_platform_updater.restart_application()
 
     def cleanup(self):
         """清理临时文件"""

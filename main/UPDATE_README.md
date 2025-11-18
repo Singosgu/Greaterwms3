@@ -14,8 +14,8 @@
 
 1. **更新器 (updater.py)** - 主要的更新逻辑实现
 2. **更新配置 (update_config.py)** - 更新相关的配置参数
-3. **更新服务 (update_service.py)** - 更新服务示例
-4. **启动器 (launcher.py)** - 集成更新检查的主程序入口
+3. **启动器 (launcher.py)** - 集成更新检查的主程序入口
+4. **跨平台更新支持 (cross_platform_updater.py)** - 跨平台更新和重启支持
 
 ## 功能特性
 
@@ -63,14 +63,6 @@ UPDATE_CHECK_INTERVAL = int(os.getenv("BOMIOT_UPDATE_INTERVAL", "3600"))  # 默�
 ENABLE_AUTO_UPDATE = os.getenv("BOMIOT_AUTO_UPDATE", "true").lower() == "true"
 ENABLE_INCREMENTAL_UPDATE = os.getenv("BOMIOT_INCREMENTAL_UPDATE", "true").lower() == "true"
 ENABLE_FILE_WATCHER = os.getenv("BOMIOT_FILE_WATCHER", "false").lower() == "true"
-```
-
-### 3. 运行更新服务
-
-运行 [update_service.py](file://e:\Github_desktop\Greaterwms3\main\update_service.py) 来启动更新服务示例：
-
-```bash
-python main/update_service.py
 ```
 
 ## 安全机制

@@ -89,10 +89,24 @@ if __name__ == "__main__":
     if update_applied:
         # 如果应用了更新，自动重启程序
         print("程序已更新，正在自动重启...")
-        # 使用 subprocess 重启程序
-        import subprocess
-        import sys
-        subprocess.Popen([sys.executable] + sys.argv)
+        # 使用跨平台重启功能
+        try:
+            from main.updater import BomiotUpdater
+            updater = BomiotUpdater()
+            if updater.restart_application():
+                print("重启命令已发送")
+            else:
+                print("重启失败，使用备用方法")
+                # 备用重启方法
+                import subprocess
+                import sys
+                subprocess.Popen([sys.executable] + sys.argv)
+        except Exception as e:
+            print(f"重启时出错: {e}")
+            # 最后的备用重启方法
+            import subprocess
+            import sys
+            subprocess.Popen([sys.executable] + sys.argv)
         exit(0)
 
     # 欢迎页
@@ -166,7 +180,6 @@ if __name__ == "__main__":
 
     from django.core.management import call_command
     from django.apps import apps
-    from django.contrib.auth import get_user_model
 
     # 准备 makemigrations 命令参数
     cmd_args = ["makemigrations"]

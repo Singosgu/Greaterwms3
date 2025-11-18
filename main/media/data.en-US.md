@@ -174,7 +174,7 @@ def example_delete(self, data):
 
 - Users can customize api fields through `API` in models
 - **Bomiot** will automatically look for your custom fields in `receiver.py`
-- `views.py` can be modified by referring to `example.py`
+- You can refer to the example implementation in the documentation when modifying `views.py`
 
 ---
 

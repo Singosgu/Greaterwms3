@@ -174,7 +174,7 @@ def example_delete(self, data):
 
 - 用户可以通过models中的`API`自定义api字段
 - **Bomiot** 会自动到`receiver.py`中寻找你的自定义字段
-- `views.py` 可以参考`example.py` 进行修改
+- 修改`views.py`时可以参考文档中的示例实现
 
 ---
 
