@@ -36,25 +36,15 @@ jobs:
           pip install -r requirements.txt
 
       # 验证配置文件一致性
-      - name: Validate Configuration Consistency
+      - name: Validate Configuration Consistency (Windows)
+        if: runner.os == 'Windows'
         run: |
-          # 根据不同操作系统使用相应的命令
-          if ($env:RUNNER_OS -eq "Windows") {
-            # Windows平台：设置PowerShell编码为UTF-8
-            chcp 65001
-            # 设置Python编码环境变量
-            $env:PYTHONIOENCODING="utf-8"
-            $pythonCmd = "python"
-          } else {
-            # macOS/Linux平台：设置Python编码环境变量
-            export PYTHONIOENCODING=utf-8
-            pythonCmd="python3"
-          }
+          # Windows平台：设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
           
-          # 使用正确的Python命令执行脚本
-          if ($env:RUNNER_OS -eq "Windows") {
-            # Windows平台使用PowerShell调用
-            & $pythonCmd -c @"
+          python -c @"
           import os
           import json
           from pathlib import Path
@@ -84,9 +74,14 @@ jobs:
           
           print('配置文件一致性检查完成')
           "@
-          } else {
-            # macOS/Linux平台使用bash调用
-            $pythonCmd -c "
+          
+      - name: Validate Configuration Consistency (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          # macOS/Linux平台：设置Python编码环境变量
+          export PYTHONIOENCODING=utf-8
+          
+          python3 -c "
           import os
           import json
           from pathlib import Path
@@ -116,8 +111,6 @@ jobs:
           
           print('配置文件一致性检查完成')
           "
-          }
-
       # 清理现有的 updates 目录并重新生成
       - name: Clean and Initialize TUF Repository (Windows)
         if: runner.os == 'Windows'
@@ -339,26 +332,16 @@ jobs:
           print('仓库初始化完成!')
           "
 
-      # 验证TUF仓库生成
-      - name: Validate TUF Repository
+      # 验证TUF仓库生成 (Windows)
+      - name: Validate TUF Repository (Windows)
+        if: runner.os == 'Windows'
         run: |
-          # 根据不同操作系统使用相应的命令
-          if ($env:RUNNER_OS -eq "Windows") {
-            # Windows平台：设置PowerShell编码为UTF-8
-            chcp 65001
-            # 设置Python编码环境变量
-            $env:PYTHONIOENCODING="utf-8"
-            $pythonCmd = "python"
-          } else {
-            # macOS/Linux平台：设置Python编码环境变量
-            export PYTHONIOENCODING=utf-8
-            pythonCmd="python3"
-          }
+          # Windows平台：设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
           
-          # 使用正确的Python命令执行脚本
-          if ($env:RUNNER_OS -eq "Windows") {
-            # Windows平台使用PowerShell调用
-            & $pythonCmd -c @"
+          python -c @"
           import os
           import json
           from pathlib import Path
@@ -396,8 +379,8 @@ jobs:
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
                           print(f'  文件: {filename}')
-                          print(f'    大小: {file_info.get(\"length\", \"未知\")}')
-                          print(f'    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}')
+                          print(f'    大小: {file_info.get("length", "未知")}')
+                          print(f'    哈希: {list(file_info.get("hashes", {}).values())[0] if file_info.get("hashes") else "未知"}')
                   else:
                       print('错误: targets.json不包含目标文件信息')
                       # 打印完整的targets.json内容用于调试
@@ -413,9 +396,15 @@ jobs:
                   file_size = os.path.getsize(file_path)
                   print(f'  {file_path} ({file_size} bytes)')
           "@
-          } else {
-            # macOS/Linux平台使用bash调用
-            $pythonCmd -c "
+
+      # 验证TUF仓库生成 (Linux/macOS)
+      - name: Validate TUF Repository (Linux/macOS)
+        if: runner.os != 'Windows'
+        run: |
+          # macOS/Linux平台：设置Python编码环境变量
+          export PYTHONIOENCODING=utf-8
+          
+          python3 -c "
           import os
           import json
           from pathlib import Path
@@ -453,8 +442,8 @@ jobs:
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
                           print(f'  文件: {filename}')
-                          print(f'    大小: {file_info.get(\"length\", \"未知\")}')
-                          print(f'    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}')
+                          print(f'    大小: {file_info.get("length", "未知")}')
+                          print(f'    哈希: {list(file_info.get("hashes", {}).values())[0] if file_info.get("hashes") else "未知"}')
                   else:
                       print('错误: targets.json不包含目标文件信息')
                       # 打印完整的targets.json内容用于调试
@@ -470,8 +459,6 @@ jobs:
                   file_size = os.path.getsize(file_path)
                   print(f'  {file_path} ({file_size} bytes)')
           "
-          }
-
       - name: Build Executable with Nuitka (Windows)
         if: runner.os == 'Windows'
         run: |
