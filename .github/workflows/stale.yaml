@@ -341,20 +341,20 @@ jobs:
           # 设置Python编码环境变量
           $env:PYTHONIOENCODING="utf-8"
           
-          python -c @"
+          python -c @'
           import os
           import json
           from pathlib import Path
           
           # 设置编码环境变量
-          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          os.environ["PYTHONIOENCODING"] = "utf-8"
           
           # 检查必要的文件是否存在
           required_files = [
-              'updates/metadata/root.json',
-              'updates/metadata/targets.json',
-              'updates/metadata/snapshot.json',
-              'updates/metadata/timestamp.json'
+              "updates/metadata/root.json",
+              "updates/metadata/targets.json",
+              "updates/metadata/snapshot.json",
+              "updates/metadata/timestamp.json"
           ]
           
           missing_files = []
@@ -363,39 +363,39 @@ jobs:
                   missing_files.append(file_path)
           
           if missing_files:
-              print(f'缺少以下文件: {missing_files}')
+              print(f"缺少以下文件: {missing_files}")
               exit(1)
           else:
-              print('所有必需的TUF仓库文件都已生成')
+              print("所有必需的TUF仓库文件都已生成")
               
           # 检查targets.json是否包含目标文件信息
-          targets_json_path = Path('updates/metadata/targets.json')
+          targets_json_path = Path("updates/metadata/targets.json")
           if targets_json_path.exists():
-              with open(targets_json_path, 'r', encoding='utf-8') as f:
+              with open(targets_json_path, "r", encoding="utf-8") as f:
                   targets_data = json.load(f)
-                  targets = targets_data.get('signed', {}).get('targets', {})
+                  targets = targets_data.get("signed", {}).get("targets", {})
                   if targets:
-                      print(f'targets.json包含以下目标文件: {list(targets.keys())}')
+                      print(f"targets.json包含以下目标文件: {list(targets.keys())}")
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
-                          print(f'  文件: {filename}')
-                          print(f'    大小: {file_info.get("length", "未知")}')
-                          print(f'    哈希: {list(file_info.get("hashes", {}).values())[0] if file_info.get("hashes") else "未知"}')
+                          print(f"  文件: {filename}")
+                          print(f"    大小: {file_info.get(\"length\", \"未知\")}")
+                          print(f"    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}")
                   else:
-                      print('错误: targets.json不包含目标文件信息')
+                      print("错误: targets.json不包含目标文件信息")
                       # 打印完整的targets.json内容用于调试
-                      print('targets.json完整内容:')
+                      print("targets.json完整内容:")
                       print(json.dumps(targets_data, indent=2, ensure_ascii=False))
                       exit(1)
           
           # 列出生成的文件
-          print('\n生成的文件列表:')
-          for root, dirs, files in os.walk('updates'):
+          print("\n生成的文件列表:")
+          for root, dirs, files in os.walk("updates"):
               for file in files:
                   file_path = os.path.join(root, file)
                   file_size = os.path.getsize(file_path)
-                  print(f'  {file_path} ({file_size} bytes)')
-          "@
+                  print(f"  {file_path} ({file_size} bytes)")
+          '@
 
       # 验证TUF仓库生成 (Linux/macOS)
       - name: Validate TUF Repository (Linux/macOS)
@@ -404,20 +404,20 @@ jobs:
           # macOS/Linux平台：设置Python编码环境变量
           export PYTHONIOENCODING=utf-8
           
-          python3 -c "
+          python3 -c '
           import os
           import json
           from pathlib import Path
           
           # 设置编码环境变量
-          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          os.environ["PYTHONIOENCODING"] = "utf-8"
           
           # 检查必要的文件是否存在
           required_files = [
-              'updates/metadata/root.json',
-              'updates/metadata/targets.json',
-              'updates/metadata/snapshot.json',
-              'updates/metadata/timestamp.json'
+              "updates/metadata/root.json",
+              "updates/metadata/targets.json",
+              "updates/metadata/snapshot.json",
+              "updates/metadata/timestamp.json"
           ]
           
           missing_files = []
@@ -426,39 +426,39 @@ jobs:
                   missing_files.append(file_path)
           
           if missing_files:
-              print(f'缺少以下文件: {missing_files}')
+              print(f"缺少以下文件: {missing_files}")
               exit(1)
           else:
-              print('所有必需的TUF仓库文件都已生成')
+              print("所有必需的TUF仓库文件都已生成")
               
           # 检查targets.json是否包含目标文件信息
-          targets_json_path = Path('updates/metadata/targets.json')
+          targets_json_path = Path("updates/metadata/targets.json")
           if targets_json_path.exists():
-              with open(targets_json_path, 'r', encoding='utf-8') as f:
+              with open(targets_json_path, "r", encoding="utf-8") as f:
                   targets_data = json.load(f)
-                  targets = targets_data.get('signed', {}).get('targets', {})
+                  targets = targets_data.get("signed", {}).get("targets", {})
                   if targets:
-                      print(f'targets.json包含以下目标文件: {list(targets.keys())}')
+                      print(f"targets.json包含以下目标文件: {list(targets.keys())}")
                       # 检查文件大小和哈希值
                       for filename, file_info in targets.items():
-                          print(f'  文件: {filename}')
-                          print(f'    大小: {file_info.get("length", "未知")}')
-                          print(f'    哈希: {list(file_info.get("hashes", {}).values())[0] if file_info.get("hashes") else "未知"}')
+                          print(f"  文件: {filename}")
+                          print(f"    大小: {file_info.get(\"length\", \"未知\")}")
+                          print(f"    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}")
                   else:
-                      print('错误: targets.json不包含目标文件信息')
+                      print("错误: targets.json不包含目标文件信息")
                       # 打印完整的targets.json内容用于调试
-                      print('targets.json完整内容:')
+                      print("targets.json完整内容:")
                       print(json.dumps(targets_data, indent=2, ensure_ascii=False))
                       exit(1)
           
           # 列出生成的文件
-          print('\n生成的文件列表:')
-          for root, dirs, files in os.walk('updates'):
+          print("\n生成的文件列表:")
+          for root, dirs, files in os.walk("updates"):
               for file in files:
                   file_path = os.path.join(root, file)
                   file_size = os.path.getsize(file_path)
-                  print(f'  {file_path} ({file_size} bytes)')
-          "
+                  print(f"  {file_path} ({file_size} bytes)")
+          '
       - name: Build Executable with Nuitka (Windows)
         if: runner.os == 'Windows'
         run: |
