@@ -51,7 +51,13 @@ cross_platform_updater = CrossPlatformUpdater()
 class BomiotUpdater:
     """Bomiot 增量更新器"""
 
-    def __init__(self, app_name: str = APP_NAME, current_version: str = CURRENT_VERSION):
+    def __init__(self, app_name: str = "Bomiot", current_version: str = "1.0.0"):
+        # 如果传入的参数为None，则使用默认值
+        if app_name is None:
+            app_name = "Bomiot"
+        if current_version is None:
+            current_version = "1.0.0"
+            
         self.app_name = app_name
         self.current_version = current_version
         self.client = None  # TUF客户端实例
@@ -394,30 +400,35 @@ class BomiotUpdater:
 
     def start_file_watcher(self, watch_directory: Path = CURRENT_DIR):
         """
-        启动文件监视器，实现实时触发更新检查
+        启动文件监视器，实现定时触发更新检查
         
         Args:
             watch_directory: 要监视的目录
         """
-        class UpdateEventHandler(FileSystemEventHandler):
-            def __init__(self, updater):
-                self.updater = updater
-            
-            def on_modified(self, event):
-                if not event.is_directory:
-                    # 文件修改时触发更新检查
-                    logger.info(f"检测到文件变更: {event.src_path}")
-                    self.updater.check_for_updates()
+        import threading
+        import time
+        from main.update_config import UPDATE_CHECK_INTERVAL
+        
+        def periodic_update_check():
+            """定期检查更新"""
+            while True:
+                try:
+                    logger.info(f"定时检查更新，间隔: {UPDATE_CHECK_INTERVAL} 秒")
+                    self.check_for_updates()
+                    # 等待指定的时间间隔
+                    time.sleep(UPDATE_CHECK_INTERVAL)
+                except Exception as e:
+                    logger.error(f"定时检查更新时出错: {e}")
+                    # 如果出现错误，等待一段时间再继续
+                    time.sleep(60)  # 等待1分钟再重试
         
         try:
-            event_handler = UpdateEventHandler(self)
-            self.observer = Observer()
-            if self.observer is not None:
-                self.observer.schedule(event_handler, str(watch_directory), recursive=True)
-                self.observer.start()
-            logger.info(f"文件监视器已启动，监视目录: {watch_directory}")
+            # 创建并启动定时检查线程
+            update_thread = threading.Thread(target=periodic_update_check, daemon=True)
+            update_thread.start()
+            logger.info(f"定时更新检查器已启动，检查间隔: {UPDATE_CHECK_INTERVAL} 秒")
         except Exception as e:
-            logger.error(f"启动文件监视器时出错: {e}")
+            logger.error(f"启动定时更新检查器时出错: {e}")
 
     def stop_file_watcher(self):
         """停止文件监视器"""
@@ -556,7 +567,7 @@ class BomiotUpdater:
             logger.error(f"清理临时文件时出错: {e}")
 
 
-def create_update_repository(repo_dir: Path, app_name: str = APP_NAME):
+def create_update_repository(repo_dir: Path, app_name: str = "Bomiot"):
     """
     创建更新仓库（供服务器端使用）
     
@@ -564,6 +575,10 @@ def create_update_repository(repo_dir: Path, app_name: str = APP_NAME):
         repo_dir: 仓库目录
         app_name: 应用名称
     """
+    # 如果app_name为None，则使用默认值
+    if app_name is None:
+        app_name = "Bomiot"
+        
     try:
         # 创建仓库
         repo = Repository(

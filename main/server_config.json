@@ -6,5 +6,6 @@
     "windows": "http://3.135.61.8:8008/media/update/win",
     "mac": "http://3.135.61.8:8008/media/update/mac",
     "linux": "http://3.135.61.8:8008/media/update/linux"
-  }
+  },
+  "update_check_interval": 3600
 }

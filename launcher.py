@@ -58,6 +58,11 @@ encrypt_info = default_encrypt_info
 
 def check_and_apply_updates():
     """检查并应用更新"""
+    # 如果APP_NAME为None或CURRENT_VERSION为None，则不执行自动更新
+    if APP_NAME is None or CURRENT_VERSION is None:
+        print("应用名称或版本未配置，跳过自动更新")
+        return False
+        
     if not UPDATER_AVAILABLE or BomiotUpdater is None:
         print("更新模块不可用，跳过更新检查")
         return False
@@ -103,12 +108,16 @@ if __name__ == "__main__":
         restart_success = False
         try:
             from main.updater import BomiotUpdater
-            updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
-            restart_success = updater.restart_application()
-            if restart_success:
-                print("重启命令已发送")
+            # 如果APP_NAME为None或CURRENT_VERSION为None，则不创建更新器实例
+            if APP_NAME is not None and CURRENT_VERSION is not None:
+                updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
+                restart_success = updater.restart_application()
+                if restart_success:
+                    print("重启命令已发送")
+                else:
+                    print("重启失败，使用备用方法")
             else:
-                print("重启失败，使用备用方法")
+                print("应用名称或版本未配置，跳过重启功能")
         except Exception as e:
             print(f"重启时出错: {e}")
             import traceback
@@ -231,6 +240,18 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during migration: {e}")
     
+    # 启动定时更新检查器（如果启用了文件监控）
+    from main.update_config import ENABLE_FILE_WATCHER
+    # 如果APP_NAME为None或CURRENT_VERSION为None，则不启动定时更新检查器
+    if APP_NAME is not None and CURRENT_VERSION is not None and UPDATER_AVAILABLE and ENABLE_FILE_WATCHER and BomiotUpdater is not None:
+        try:
+            updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
+            # 启动定时更新检查器
+            updater.start_file_watcher()
+            print("定时更新检查器已启动")
+        except Exception as e:
+            print(f"启动定时更新检查器时出错: {e}")
+
     # 保持欢迎页显示一段时间（原逻辑的10秒）
     print('正在启动系统')
     
