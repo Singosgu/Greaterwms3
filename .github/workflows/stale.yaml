@@ -39,8 +39,12 @@ jobs:
       - name: Validate Configuration Consistency
         run: |
           python -c "
+          import os
           import json
           from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
           
           # 读取 server_config.json
           server_config_path = Path('main/server_config.json')
@@ -59,7 +63,6 @@ jobs:
                   print(f'.tufup-repo-config 应用名: {app_name}')
           
           # 检查环境变量版本
-          import os
           env_version = os.environ.get('BASE_VERSION', 'unknown')
           print(f'环境变量版本: {env_version}')
           
@@ -75,7 +78,12 @@ jobs:
           import sys
           import json
           import shutil
+          import zipfile
           from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          
           sys.path.insert(0, str(Path.cwd()))
           from main.update_config import APP_NAME, CURRENT_VERSION
           from tufup.repo import Repository
@@ -116,13 +124,45 @@ jobs:
           repo.initialize()
           print('TUF 仓库初始化成功!')
           
-          # 创建一个简单的应用目录结构作为示例
+          # 创建应用目录结构
           app_dir = REPO_DIR / 'app'
           app_dir.mkdir(exist_ok=True)
           
-          # 创建一个简单的应用文件
-          app_file = app_dir / 'app.py'
-          app_file.write_text(f'# {APP_NAME} Application\\nprint(\"Hello from {APP_NAME} version {CURRENT_VERSION}\")')
+          # 复制实际的应用文件到app目录
+          # 这里我们创建一个简单的应用包作为示例
+          # 在实际使用中，这里应该包含真正的应用文件
+          files_to_include = [
+              'launcher.py',
+              'main',
+              'setup.ini',
+              'splash.png'
+          ]
+          
+          for item in files_to_include:
+              src = Path.cwd() / item
+              dst = app_dir / item
+              if src.exists():
+                  if src.is_dir():
+                      if dst.exists():
+                          shutil.rmtree(dst)
+                      shutil.copytree(src, dst)
+                      print(f'复制目录: {item}')
+                  else:
+                      shutil.copy2(src, dst)
+                      print(f'复制文件: {item}')
+          
+          # 创建一个简单的zip包作为示例更新文件
+          # 在实际使用中，这里应该创建真正的应用安装包
+          zip_path = app_dir / f'{APP_NAME}-{CURRENT_VERSION}.zip'
+          with zipfile.ZipFile(zip_path, 'w') as zipf:
+              for root, dirs, files in os.walk(app_dir):
+                  for file in files:
+                      if file != zip_path.name:  # 不包含zip文件本身
+                          file_path = os.path.join(root, file)
+                          arc_path = os.path.relpath(file_path, app_dir)
+                          zipf.write(file_path, arc_path)
+          
+          print(f'创建应用包: {zip_path}')
           
           # 添加初始版本到仓库（启用补丁创建以支持增量更新）
           repo.add_bundle(
@@ -130,6 +170,9 @@ jobs:
               new_version=CURRENT_VERSION,
               skip_patch=False  # 启用补丁创建以支持增量更新
           )
+          
+          # 发布更改以生成完整的元数据
+          repo.publish_changes(private_key_dirs=[KEYS_DIR])
           
           print('仓库初始化完成!')
           "
@@ -142,7 +185,12 @@ jobs:
           import sys
           import json
           import shutil
+          import tarfile
           from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          
           sys.path.insert(0, str(Path.cwd()))
           from main.update_config import APP_NAME, CURRENT_VERSION
           from tufup.repo import Repository
@@ -183,13 +231,45 @@ jobs:
           repo.initialize()
           print('TUF 仓库初始化成功!')
           
-          # 创建一个简单的应用目录结构作为示例
+          # 创建应用目录结构
           app_dir = REPO_DIR / 'app'
           app_dir.mkdir(exist_ok=True)
           
-          # 创建一个简单的应用文件
-          app_file = app_dir / 'app.py'
-          app_file.write_text(f'# {APP_NAME} Application\\nprint(\"Hello from {APP_NAME} version {CURRENT_VERSION}\")')
+          # 复制实际的应用文件到app目录
+          # 这里我们创建一个简单的应用包作为示例
+          # 在实际使用中，这里应该包含真正的应用文件
+          files_to_include = [
+              'launcher.py',
+              'main',
+              'setup.ini',
+              'splash.png'
+          ]
+          
+          for item in files_to_include:
+              src = Path.cwd() / item
+              dst = app_dir / item
+              if src.exists():
+                  if src.is_dir():
+                      if dst.exists():
+                          shutil.rmtree(dst)
+                      shutil.copytree(src, dst)
+                      print(f'复制目录: {item}')
+                  else:
+                      shutil.copy2(src, dst)
+                      print(f'复制文件: {item}')
+          
+          # 创建一个简单的tar.gz包作为示例更新文件
+          # 在实际使用中，这里应该创建真正的应用安装包
+          tar_path = app_dir / f'{APP_NAME}-{CURRENT_VERSION}.tar.gz'
+          with tarfile.open(tar_path, 'w:gz') as tar:
+              for root, dirs, files in os.walk(app_dir):
+                  for file in files:
+                      if file != tar_path.name:  # 不包含tar.gz文件本身
+                          file_path = os.path.join(root, file)
+                          arc_path = os.path.relpath(file_path, app_dir)
+                          tar.add(file_path, arcname=arc_path)
+          
+          print(f'创建应用包: {tar_path}')
           
           # 添加初始版本到仓库（启用补丁创建以支持增量更新）
           repo.add_bundle(
@@ -197,6 +277,9 @@ jobs:
               new_version=CURRENT_VERSION,
               skip_patch=False  # 启用补丁创建以支持增量更新
           )
+          
+          # 发布更改以生成完整的元数据
+          repo.publish_changes(private_key_dirs=[KEYS_DIR])
           
           print('仓库初始化完成!')
           "
@@ -206,15 +289,18 @@ jobs:
         run: |
           python -c "
           import os
+          import json
           from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
           
           # 检查必要的文件是否存在
           required_files = [
               'updates/metadata/root.json',
               'updates/metadata/targets.json',
               'updates/metadata/snapshot.json',
-              'updates/metadata/timestamp.json',
-              'updates/targets/Bomiot-1.1.1.tar.gz'
+              'updates/metadata/timestamp.json'
           ]
           
           missing_files = []
@@ -228,11 +314,33 @@ jobs:
           else:
               print('所有必需的TUF仓库文件都已生成')
               
+          # 检查targets.json是否包含目标文件信息
+          targets_json_path = Path('updates/metadata/targets.json')
+          if targets_json_path.exists():
+              with open(targets_json_path, 'r', encoding='utf-8') as f:
+                  targets_data = json.load(f)
+                  targets = targets_data.get('signed', {}).get('targets', {})
+                  if targets:
+                      print(f'targets.json包含以下目标文件: {list(targets.keys())}')
+                      # 检查文件大小和哈希值
+                      for filename, file_info in targets.items():
+                          print(f'  文件: {filename}')
+                          print(f'    大小: {file_info.get(\"length\", \"未知\")}')
+                          print(f'    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}')
+                  else:
+                      print('错误: targets.json不包含目标文件信息')
+                      # 打印完整的targets.json内容用于调试
+                      print('targets.json完整内容:')
+                      print(json.dumps(targets_data, indent=2, ensure_ascii=False))
+                      exit(1)
+          
           # 列出生成的文件
           print('\\n生成的文件列表:')
           for root, dirs, files in os.walk('updates'):
               for file in files:
-                  print(f'  {os.path.join(root, file)}')
+                  file_path = os.path.join(root, file)
+                  file_size = os.path.getsize(file_path)
+                  print(f'  {file_path} ({file_size} bytes)')
           "
 
       - name: Build Executable with Nuitka (Windows)
