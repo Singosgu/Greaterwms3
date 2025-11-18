@@ -39,20 +39,54 @@ jobs:
       - name: Validate Configuration Consistency
         run: |
           # 根据不同操作系统使用相应的命令
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if ($env:RUNNER_OS -eq "Windows") {
             # Windows平台：设置PowerShell编码为UTF-8
             chcp 65001
             # 设置Python编码环境变量
             $env:PYTHONIOENCODING="utf-8"
-            pythonCmd="python"
-          else
+            $pythonCmd = "python"
+          } else {
             # macOS/Linux平台：设置Python编码环境变量
             export PYTHONIOENCODING=utf-8
             pythonCmd="python3"
-          fi
+          }
           
           # 使用正确的Python命令执行脚本
-          $pythonCmd -c "
+          if ($env:RUNNER_OS -eq "Windows") {
+            # Windows平台使用PowerShell调用
+            & $pythonCmd -c @"
+          import os
+          import json
+          from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          
+          # 读取 server_config.json
+          server_config_path = Path('main/server_config.json')
+          if server_config_path.exists():
+              with open(server_config_path, 'r', encoding='utf-8') as f:
+                  server_config = json.load(f)
+                  server_version = server_config.get('current_version', 'unknown')
+                  print(f'server_config.json 版本: {server_version}')
+          
+          # 读取 .tufup-repo-config
+          tufup_config_path = Path('.tufup-repo-config')
+          if tufup_config_path.exists():
+              with open(tufup_config_path, 'r', encoding='utf-8') as f:
+                  tufup_config = json.load(f)
+                  app_name = tufup_config.get('app_name', 'unknown')
+                  print(f'.tufup-repo-config 应用名: {app_name}')
+          
+          # 检查环境变量版本
+          env_version = os.environ.get('BASE_VERSION', 'unknown')
+          print(f'环境变量版本: {env_version}')
+          
+          print('配置文件一致性检查完成')
+          "@
+          } else {
+            # macOS/Linux平台使用bash调用
+            $pythonCmd -c "
           import os
           import json
           from pathlib import Path
@@ -82,6 +116,7 @@ jobs:
           
           print('配置文件一致性检查完成')
           "
+          }
 
       # 清理现有的 updates 目录并重新生成
       - name: Clean and Initialize TUF Repository (Windows)
@@ -308,20 +343,79 @@ jobs:
       - name: Validate TUF Repository
         run: |
           # 根据不同操作系统使用相应的命令
-          if [ "$RUNNER_OS" == "Windows" ]; then
+          if ($env:RUNNER_OS -eq "Windows") {
             # Windows平台：设置PowerShell编码为UTF-8
             chcp 65001
             # 设置Python编码环境变量
             $env:PYTHONIOENCODING="utf-8"
-            pythonCmd="python"
-          else
+            $pythonCmd = "python"
+          } else {
             # macOS/Linux平台：设置Python编码环境变量
             export PYTHONIOENCODING=utf-8
             pythonCmd="python3"
-          fi
+          }
           
           # 使用正确的Python命令执行脚本
-          $pythonCmd -c "
+          if ($env:RUNNER_OS -eq "Windows") {
+            # Windows平台使用PowerShell调用
+            & $pythonCmd -c @"
+          import os
+          import json
+          from pathlib import Path
+          
+          # 设置编码环境变量
+          os.environ['PYTHONIOENCODING'] = 'utf-8'
+          
+          # 检查必要的文件是否存在
+          required_files = [
+              'updates/metadata/root.json',
+              'updates/metadata/targets.json',
+              'updates/metadata/snapshot.json',
+              'updates/metadata/timestamp.json'
+          ]
+          
+          missing_files = []
+          for file_path in required_files:
+              if not Path(file_path).exists():
+                  missing_files.append(file_path)
+          
+          if missing_files:
+              print(f'缺少以下文件: {missing_files}')
+              exit(1)
+          else:
+              print('所有必需的TUF仓库文件都已生成')
+              
+          # 检查targets.json是否包含目标文件信息
+          targets_json_path = Path('updates/metadata/targets.json')
+          if targets_json_path.exists():
+              with open(targets_json_path, 'r', encoding='utf-8') as f:
+                  targets_data = json.load(f)
+                  targets = targets_data.get('signed', {}).get('targets', {})
+                  if targets:
+                      print(f'targets.json包含以下目标文件: {list(targets.keys())}')
+                      # 检查文件大小和哈希值
+                      for filename, file_info in targets.items():
+                          print(f'  文件: {filename}')
+                          print(f'    大小: {file_info.get(\"length\", \"未知\")}')
+                          print(f'    哈希: {list(file_info.get(\"hashes\", {}).values())[0] if file_info.get(\"hashes\") else \"未知\"}')
+                  else:
+                      print('错误: targets.json不包含目标文件信息')
+                      # 打印完整的targets.json内容用于调试
+                      print('targets.json完整内容:')
+                      print(json.dumps(targets_data, indent=2, ensure_ascii=False))
+                      exit(1)
+          
+          # 列出生成的文件
+          print('\n生成的文件列表:')
+          for root, dirs, files in os.walk('updates'):
+              for file in files:
+                  file_path = os.path.join(root, file)
+                  file_size = os.path.getsize(file_path)
+                  print(f'  {file_path} ({file_size} bytes)')
+          "@
+          } else {
+            # macOS/Linux平台使用bash调用
+            $pythonCmd -c "
           import os
           import json
           from pathlib import Path
@@ -376,6 +470,7 @@ jobs:
                   file_size = os.path.getsize(file_path)
                   print(f'  {file_path} ({file_size} bytes)')
           "
+          }
 
       - name: Build Executable with Nuitka (Windows)
         if: runner.os == 'Windows'
