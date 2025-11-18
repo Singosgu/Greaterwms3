@@ -38,10 +38,21 @@ jobs:
       # 验证配置文件一致性
       - name: Validate Configuration Consistency
         run: |
-          # 设置Python编码环境变量
-          export PYTHONIOENCODING=utf-8
+          # 根据不同操作系统使用相应的命令
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            # Windows平台：设置PowerShell编码为UTF-8
+            chcp 65001
+            # 设置Python编码环境变量
+            $env:PYTHONIOENCODING="utf-8"
+            pythonCmd="python"
+          else
+            # macOS/Linux平台：设置Python编码环境变量
+            export PYTHONIOENCODING=utf-8
+            pythonCmd="python3"
+          fi
           
-          python3 -c "
+          # 使用正确的Python命令执行脚本
+          $pythonCmd -c "
           import os
           import json
           from pathlib import Path
@@ -296,10 +307,21 @@ jobs:
       # 验证TUF仓库生成
       - name: Validate TUF Repository
         run: |
-          # 设置Python编码环境变量
-          export PYTHONIOENCODING=utf-8
+          # 根据不同操作系统使用相应的命令
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            # Windows平台：设置PowerShell编码为UTF-8
+            chcp 65001
+            # 设置Python编码环境变量
+            $env:PYTHONIOENCODING="utf-8"
+            pythonCmd="python"
+          else
+            # macOS/Linux平台：设置Python编码环境变量
+            export PYTHONIOENCODING=utf-8
+            pythonCmd="python3"
+          fi
           
-          python3 -c "
+          # 使用正确的Python命令执行脚本
+          $pythonCmd -c "
           import os
           import json
           from pathlib import Path
