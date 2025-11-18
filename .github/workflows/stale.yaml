@@ -3,7 +3,6 @@ name: Nuitka Build
 env:
   APP_NAME: "Bomiot"  # 应用名称（全局共享）
   BASE_VERSION: "1.1.1"  # 基础版本号（全局共享）
-  PYTHONIOENCODING: "utf-8"  # 设置Python IO编码为UTF-8，解决Windows平台Unicode编码问题
 
 on:
   push:
@@ -437,7 +436,6 @@ jobs:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
-          PYTHONIOENCODING: "utf-8"
 
       # Build python script into a single execute or app folder (mscos)
       - uses: Nuitka/Nuitka-Action@main
@@ -505,7 +503,6 @@ jobs:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
-          PYTHONIOENCODING: "utf-8"
 
       # Build python script into a single execute or app folder (Ubuntu)
       - uses: Nuitka/Nuitka-Action@main
@@ -571,7 +568,6 @@ jobs:
           DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
           RUN_MAIN: "true"
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
-          PYTHONIOENCODING: "utf-8"
 
       # Uploads artifact
       - name: Upload Artifact
