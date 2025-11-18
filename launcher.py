@@ -4,17 +4,76 @@ import uvicorn
 import socket
 import webbrowser
 import threading
-from bomiot_token import encrypt_info
 from os.path import join, exists 
 from os import getcwd
 import tkinter as tk
 from PIL import Image, ImageTk
 import requests
 
-app_name = "Bomiot"
-version = "1.0.1"
+# 定义默认值
+APP_NAME = "Bomiot"
+CURRENT_VERSION = "1.1.1"
+UPDATE_SERVER_URL = "http://3.135.61.8:8008/media/update"
+ENABLE_AUTO_UPDATE = True
+
+# 导入更新模块
+UPDATER_AVAILABLE = False
+BomiotUpdater = None
+try:
+    from main.updater import BomiotUpdater
+    from main.update_config import APP_NAME, CURRENT_VERSION, UPDATE_SERVER_URL, ENABLE_AUTO_UPDATE
+    UPDATER_AVAILABLE = True
+except ImportError:
+    print("警告: 更新模块不可用")
+
+# 定义 encrypt_info 函数
+def default_encrypt_info():
+    import random
+    import string
+    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
+
+# 使用默认的加密函数
+encrypt_info = default_encrypt_info
+
+def check_and_apply_updates():
+    """检查并应用更新"""
+    if not UPDATER_AVAILABLE or BomiotUpdater is None:
+        return False
+    
+    try:
+        # 创建更新器实例
+        updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
+        
+        # 获取动态更新服务器地址（如果有的话）
+        dynamic_url = updater.get_dynamic_update_server_url(UPDATE_SERVER_URL)
+        
+        # 如果启用了自动更新，则执行自动更新
+        if ENABLE_AUTO_UPDATE:
+            print("正在检查更新...")
+            success = updater.auto_update(dynamic_url)
+            if success:
+                print("更新完成，请重启应用程序")
+                return True
+            else:
+                print("无可用更新或更新失败")
+                return False
+        return False
+    except Exception as e:
+        print(f"检查更新时出错: {e}")
+        return False
 
 if __name__ == "__main__":
+    # 检查并应用更新（在欢迎页面显示期间）
+    update_applied = check_and_apply_updates()
+    if update_applied:
+        # 如果应用了更新，自动重启程序
+        print("程序已更新，正在自动重启...")
+        # 使用 subprocess 重启程序
+        import subprocess
+        import sys
+        subprocess.Popen([sys.executable] + sys.argv)
+        exit(0)
+
     # 欢迎页
     splash = tk.Tk()
     window_width = 675
@@ -65,6 +124,7 @@ if __name__ == "__main__":
 
     # 强制刷新窗口，确保splash在后续操作前显示
     splash.update()
+    
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
@@ -166,6 +226,3 @@ if __name__ == "__main__":
             timeout_graceful_shutdown=30,
             loop="auto",
         )
-    
-    
-    

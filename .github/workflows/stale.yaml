@@ -16,7 +16,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, macos-latest, ubuntu-20.04, ubuntu-22.04]
+        os: [windows-latest]
 
     steps:
 
@@ -68,7 +68,7 @@ jobs:
           product-version: ${{ env.BASE_VERSION }}
           copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
           windows-icon-from-ico: logo.ico
-          windows-console-mode: disable
+          # windows-console-mode: disable
           lto: yes
           enable-plugins: tk-inter
           # 包含的数据文件
@@ -103,6 +103,10 @@ jobs:
             rest_framework_csv
             django_apscheduler
             corsheaders
+            tufup
+            securesystemslib
+            cryptography
+            bsdiff4
           # 包含的模块
           include-module: |
             django.core.management

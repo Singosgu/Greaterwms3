@@ -21,7 +21,7 @@ def build_exe():
         "--output-filename=bomiot",  # 指定输出文件名
         "--include-data-dir=dbs=dbs",  # 包含数据库目录
         "--include-data-dir=logs=logs",  # 包含日志目录
-        "--include-data-dir=main=main",  # 包含日志目录
+        "--include-data-dir=main=main",  # 包含main目录
         "--include-data-file=setup.ini=setup.ini",  # 包含setup.ini文件
         # "--verbose",  # 输出详细信息
         "--lto=yes",  # 开启链接时优化
@@ -48,6 +48,9 @@ def build_exe():
         "--include-package=tufup",
         "--include-package=securesystemslib",  # tufup 依赖
         "--include-package=cryptography",     # tufup 依赖
+        "--include-package=bsdiff4",          # 增量更新依赖
+        "--include-package=certifi",          # SSL 证书依赖
+        "--include-package=packaging",        # 包管理依赖
         # 启动脚本
         "launcher.py",
     ]
