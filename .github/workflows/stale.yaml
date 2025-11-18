@@ -3,6 +3,7 @@ name: Nuitka Build
 env:
   APP_NAME: "Bomiot"  # 应用名称（全局共享）
   BASE_VERSION: "1.1.1"  # 基础版本号（全局共享）
+  PYTHONIOENCODING: "utf-8"  # 设置Python IO编码为UTF-8，解决Windows平台Unicode编码问题
 
 on:
   push:
@@ -38,7 +39,11 @@ jobs:
       # 验证配置文件一致性
       - name: Validate Configuration Consistency
         run: |
-          python -c "
+          # 设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
+          python -c @"
           import os
           import json
           from pathlib import Path
@@ -67,13 +72,17 @@ jobs:
           print(f'环境变量版本: {env_version}')
           
           print('配置文件一致性检查完成')
-          "
+          "@
 
       # 清理现有的 updates 目录并重新生成
       - name: Clean and Initialize TUF Repository (Windows)
         if: runner.os == 'Windows'
         run: |
-          python -c "
+          # 设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
+          python -c @"
           import os
           import sys
           import json
@@ -175,11 +184,13 @@ jobs:
           repo.publish_changes(private_key_dirs=[KEYS_DIR])
           
           print('仓库初始化完成!')
-          "
+          "@
 
       - name: Clean and Initialize TUF Repository (macOS/Linux)
         if: runner.os != 'Windows'
         run: |
+          # 设置Python编码环境变量
+          export PYTHONIOENCODING=utf-8
           python3 -c "
           import os
           import sys
@@ -287,7 +298,17 @@ jobs:
       # 验证TUF仓库生成
       - name: Validate TUF Repository
         run: |
-          python -c "
+          # 设置PowerShell编码为UTF-8 (Windows) 或 export (macOS/Linux)
+          if ($env:RUNNER_OS -eq "Windows") {
+            chcp 65001
+            $env:PYTHONIOENCODING="utf-8"
+            $pythonCmd = "python"
+          } else {
+            export PYTHONIOENCODING=utf-8
+            pythonCmd="python3"
+          }
+          
+          & $pythonCmd -c @"
           import os
           import json
           from pathlib import Path
@@ -335,13 +356,13 @@ jobs:
                       exit(1)
           
           # 列出生成的文件
-          print('\\n生成的文件列表:')
+          print('\n生成的文件列表:')
           for root, dirs, files in os.walk('updates'):
               for file in files:
                   file_path = os.path.join(root, file)
                   file_size = os.path.getsize(file_path)
                   print(f'  {file_path} ({file_size} bytes)')
-          "
+          "@
 
       - name: Build Executable with Nuitka (Windows)
         if: runner.os == 'Windows'
