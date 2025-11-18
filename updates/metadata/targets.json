@@ -1,15 +1,28 @@
 {
  "signatures": [
   {
-   "keyid": "8d6ef649bfe0faf1190fd57d3457937510e448ffb4e99a8c7bb2c289ab944c73",
-   "sig": "5fa1610eab190608b60b9eb1d38c97187658aaf68ceb1b1e031b4a140870280d6db557866245cee6caa1527c5de3c74a1381217a55f44f114e24042c4a67be07"
+   "keyid": "6c342d17530325b3d439dbfbbeda378b85aa8613e2951bef2896b9a3d08ba58f",
+   "sig": "62727e89457be3519e5836948468d77b1419c9529305d5bfcf8738446938fc86c0d340f44ad64e227fda1ed77e63d6dc21afbde205d62781097f4534c2c8bd07"
   }
  ],
  "signed": {
   "_type": "targets",
-  "expires": "2025-11-25T10:43:23Z",
+  "expires": "2025-11-25T11:07:24Z",
   "spec_version": "1.0.31",
-  "targets": {},
-  "version": 1
+  "targets": {
+   "Bomiot-1.1.1.tar.gz": {
+    "custom": {
+     "tufup": {
+      "required": false
+     },
+     "user": null
+    },
+    "hashes": {
+     "sha256": "7be6d5f60309f78986072de3d892421fa9acd1eb4fc3d57b36434ef9d75c16d7"
+    },
+    "length": 7669085
+   }
+  },
+  "version": 2
  }
 }

@@ -7,8 +7,28 @@ import json
 import os
 import shutil
 import tarfile
+import zipfile
+import platform
 from pathlib import Path
 from tufup.repo import Repository
+
+def create_zip_package(source_dir, output_path):
+    """创建ZIP格式的更新包"""
+    print(f"创建ZIP更新包: {output_path}")
+    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(source_dir):
+            for file in files:
+                file_path = Path(root) / file
+                arc_path = file_path.relative_to(source_dir)
+                zipf.write(file_path, arc_path)
+    print(f"ZIP更新包创建成功: {output_path}")
+
+def create_tar_gz_package(source_dir, output_path):
+    """创建TAR.GZ格式的更新包"""
+    print(f"创建TAR.GZ更新包: {output_path}")
+    with tarfile.open(output_path, "w:gz") as tar:
+        tar.add(source_dir, arcname=".")
+    print(f"TAR.GZ更新包创建成功: {output_path}")
 
 def create_update_package():
     """创建更新包并添加到TUF仓库"""
@@ -34,6 +54,17 @@ def create_update_package():
     
     print(f"应用名称: {app_name}")
     print(f"当前版本: {current_version}")
+    
+    # 检测当前平台
+    system = platform.system().lower()
+    if system == 'windows':
+        package_format = 'zip'
+        package_extension = '.zip'
+    else:
+        package_format = 'tar.gz'
+        package_extension = '.tar.gz'
+    
+    print(f"当前平台: {system}, 使用格式: {package_format}")
     
     # 创建targets目录（如果不存在）
     targets_dir.mkdir(parents=True, exist_ok=True)
@@ -65,15 +96,14 @@ def create_update_package():
                     shutil.copy2(src, dst)
                 print(f"  复制: {item}")
         
-        # 创建tar.gz包
-        package_name = f"{app_name}-{current_version}.tar.gz"
+        # 创建更新包
+        package_name = f"{app_name}-{current_version}{package_extension}"
         package_path = targets_dir / package_name
         
-        print(f"创建更新包: {package_name}")
-        with tarfile.open(package_path, "w:gz") as tar:
-            tar.add(temp_dir, arcname=".")
-        
-        print(f"更新包创建成功: {package_path}")
+        if package_format == 'zip':
+            create_zip_package(temp_dir, package_path)
+        else:
+            create_tar_gz_package(temp_dir, package_path)
         
         # 清理临时目录
         shutil.rmtree(temp_dir)
@@ -146,6 +176,8 @@ def create_update_package():
         
     except Exception as e:
         print(f"创建更新包时出错: {e}")
+        import traceback
+        traceback.print_exc()
         # 清理临时目录
         if temp_dir.exists():
             shutil.rmtree(temp_dir)

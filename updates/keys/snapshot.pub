@@ -1,1 +1,1 @@
-{"keytype": "ed25519", "scheme": "ed25519", "keyid_hash_algorithms": ["sha256", "sha512"], "keyval": {"public": "fba636419b2517556a942ce75be3e732391bc1e03d526ce4deb35986c2f1e0ac"}}
+{"keytype": "ed25519", "scheme": "ed25519", "keyid_hash_algorithms": ["sha256", "sha512"], "keyval": {"public": "c3256ec0c5a28b0fb2cd63255521ab907ca1ea9aa26d1abe7891314eb2644031"}}
