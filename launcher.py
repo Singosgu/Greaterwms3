@@ -4,150 +4,24 @@ import uvicorn
 import socket
 import webbrowser
 import threading
+from bomiot_token import encrypt_info
 from os.path import join, exists 
 from os import getcwd
 import tkinter as tk
 from PIL import Image, ImageTk
 import requests
-import json
 
-# 导入统一配置
-from main.update_config import APP_NAME as CONFIG_APP_NAME, CURRENT_VERSION as CONFIG_CURRENT_VERSION, UPDATE_SERVER_URL, ENABLE_AUTO_UPDATE
-
-# 使用配置文件中的默认值
-APP_NAME = CONFIG_APP_NAME
-CURRENT_VERSION = CONFIG_CURRENT_VERSION
-
-# 尝试从动态配置文件中读取应用信息
-def load_dynamic_app_info():
-    """从动态配置文件中加载应用信息"""
-    global APP_NAME, CURRENT_VERSION
-    try:
-        # 导入更新配置以获取统一的配置文件路径
-        from main.update_config import DYNAMIC_UPDATE_CONFIG_FILE
-        if DYNAMIC_UPDATE_CONFIG_FILE.exists():
-            with open(DYNAMIC_UPDATE_CONFIG_FILE, 'r', encoding='utf-8') as f:
-                config = json.load(f)
-                if 'app_name' in config:
-                    APP_NAME = config['app_name']
-                if 'current_version' in config:
-                    CURRENT_VERSION = config['current_version']
-    except Exception as e:
-        print(f"读取动态配置文件时出错: {e}")
-
-# 在导入更新模块之前加载动态配置
-load_dynamic_app_info()
-
-# 导入更新模块
-UPDATER_AVAILABLE = False
-BomiotUpdater = None
-try:
-    from main.updater import BomiotUpdater
-    UPDATER_AVAILABLE = True
-except ImportError:
-    print("警告: 更新模块不可用")
-
-# 定义 encrypt_info 函数
-def default_encrypt_info():
-    import random
-    import string
-    return ''.join(random.choices(string.ascii_letters + string.digits, k=32))
-
-# 使用默认的加密函数
-encrypt_info = default_encrypt_info
-
-def check_and_apply_updates():
-    """检查并应用更新"""
-    # 如果APP_NAME为None或CURRENT_VERSION为None，则不执行自动更新
-    if APP_NAME is None or CURRENT_VERSION is None:
-        print("应用名称或版本未配置，跳过自动更新")
-        return False
-        
-    if not UPDATER_AVAILABLE or BomiotUpdater is None:
-        print("更新模块不可用，跳过更新检查")
-        return False
-    
-    try:
-        # 创建更新器实例
-        updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
-        
-        # 获取动态更新服务器地址（如果有的话）
-        dynamic_url = updater.get_dynamic_update_server_url(UPDATE_SERVER_URL)
-        print(f"使用更新服务器地址: {dynamic_url}")
-        
-        # 如果启用了自动更新，则执行自动更新
-        if ENABLE_AUTO_UPDATE:
-            print("正在检查更新...")
-            success = updater.auto_update(dynamic_url)
-            if success:
-                print("更新完成，请重启应用程序")
-                sleep(1000)
-                return True
-            else:
-                print("无可用更新或更新失败")
-                sleep(1000)
-                return False
-        else:
-            print("自动更新已禁用")
-            sleep(1000)
-        return False
-    except Exception as e:
-        print(f"检查更新时出错: {e}")
-        import traceback
-        traceback.print_exc()
-        sleep(1)
-        return False
+app_name = "Bomiot"
+version = "1.0.1"
 
 if __name__ == "__main__":
-    # 检查并应用更新（在欢迎页面显示期间）
-    update_applied = check_and_apply_updates()
-    if update_applied:
-        # 如果应用了更新，自动重启程序
-        print("程序已更新，正在自动重启...")
-        # 使用跨平台重启功能
-        restart_success = False
-        try:
-            from main.updater import BomiotUpdater
-            # 如果APP_NAME为None或CURRENT_VERSION为None，则不创建更新器实例
-            if APP_NAME is not None and CURRENT_VERSION is not None:
-                updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
-                restart_success = updater.restart_application()
-                if restart_success:
-                    print("重启命令已发送")
-                else:
-                    print("重启失败，使用备用方法")
-            else:
-                print("应用名称或版本未配置，跳过重启功能")
-        except Exception as e:
-            print(f"重启时出错: {e}")
-            import traceback
-            traceback.print_exc()
-        
-        # 如果主重启方法失败，使用备用重启方法
-        if not restart_success:
-            try:
-                import subprocess
-                import sys
-                subprocess.Popen([sys.executable] + sys.argv)
-                print("备用重启方法已执行")
-            except Exception as e:
-                print(f"备用重启方法也失败了: {e}")
-                import traceback
-                traceback.print_exc()
-        
-        # 退出当前进程
-        exit(0)
-
     # 欢迎页
     splash = tk.Tk()
     window_width = 675
     window_height = 329
     x = int(splash.winfo_screenwidth() / 2 - window_width / 2)
     y = int(splash.winfo_screenheight() / 2 - window_height / 2)
-
-    canvas = tk.Canvas(splash, width=window_width, height=window_height, highlightthickness=0)
-    canvas.configure(bg='')
-    splash.wm_attributes('-transparentcolor', '')
+    canvas = tk.Canvas(splash, width=window_width, height=window_height, bg='white', highlightthickness=0)
     canvas.pack()
 
     splash.title("Welcome to Bomiot")
@@ -188,7 +62,6 @@ if __name__ == "__main__":
 
     # 强制刷新窗口，确保splash在后续操作前显示
     splash.update()
-    
     # 设置 Django 环境变量
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "bomiot.server.server.settings")
     os.environ.setdefault("RUN_MAIN", "true")
@@ -209,6 +82,7 @@ if __name__ == "__main__":
 
     from django.core.management import call_command
     from django.apps import apps
+    from django.contrib.auth import get_user_model
 
     # 准备 makemigrations 命令参数
     cmd_args = ["makemigrations"]
@@ -240,18 +114,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error during migration: {e}")
     
-    # 启动定时更新检查器（如果启用了文件监控）
-    from main.update_config import ENABLE_FILE_WATCHER
-    # 如果APP_NAME为None或CURRENT_VERSION为None，则不启动定时更新检查器
-    if APP_NAME is not None and CURRENT_VERSION is not None and UPDATER_AVAILABLE and ENABLE_FILE_WATCHER and BomiotUpdater is not None:
-        try:
-            updater = BomiotUpdater(APP_NAME, CURRENT_VERSION)
-            # 启动定时更新检查器
-            updater.start_file_watcher()
-            print("定时更新检查器已启动")
-        except Exception as e:
-            print(f"启动定时更新检查器时出错: {e}")
-
     # 保持欢迎页显示一段时间（原逻辑的10秒）
     print('正在启动系统')
     
@@ -301,3 +163,6 @@ if __name__ == "__main__":
             timeout_graceful_shutdown=30,
             loop="auto",
         )
+    
+    
+    
