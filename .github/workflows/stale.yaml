@@ -72,7 +72,7 @@ jobs:
           "@
           
       # 清理现有的 updates 目录并重新生成
-      - name: Clean and Initialize TUF Repository (Windows)
+      - name: Setup TUF Repository (Windows)
         run: |
           # 设置PowerShell编码为UTF-8
           chcp 65001
@@ -103,31 +103,43 @@ jobs:
           METADATA_DIR = REPO_DIR / 'metadata'
           TARGETS_DIR = REPO_DIR / 'targets'
           
-          # 清理现有的目录（如果存在）
-          for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
-              if directory.exists():
-                  shutil.rmtree(directory)
-                  print(f'清理目录: {directory}')
+          # 检查是否已存在密钥
+          existing_keys = list(KEYS_DIR.glob('*')) if KEYS_DIR.exists() else []
           
-          # 创建必要的目录
-          for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
-              directory.mkdir(parents=True, exist_ok=True)
-              print(f'创建目录: {directory}')
-          
-          # 创建仓库实例，使用与配置文件一致的参数
-          repo = Repository(
-              app_name=config['app_name'],
-              repo_dir=REPO_DIR,
-              keys_dir=KEYS_DIR,
-              key_map=config['key_map'],
-              encrypted_keys=config['encrypted_keys'],
-              expiration_days=config['expiration_days'],
-              thresholds=config['thresholds']
-          )
-          
-          # 初始化仓库
-          repo.initialize()
-          print('TUF 仓库初始化成功!')
+          if existing_keys:
+              print('发现现有密钥，跳过重新生成...')
+              print('现有密钥文件:')
+              for key_file in existing_keys:
+                  print(f'  - {key_file.name}')
+          else:
+              # 只有在没有现有密钥时才清理和初始化
+              print('未发现现有密钥，初始化新的 TUF 仓库...')
+              
+              # 清理现有的目录（如果存在）
+              for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
+                  if directory.exists():
+                      shutil.rmtree(directory)
+                      print(f'清理目录: {directory}')
+              
+              # 创建必要的目录
+              for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
+                  directory.mkdir(parents=True, exist_ok=True)
+                  print(f'创建目录: {directory}')
+              
+              # 创建仓库实例，使用与配置文件一致的参数
+              repo = Repository(
+                  app_name=config['app_name'],
+                  repo_dir=REPO_DIR,
+                  keys_dir=KEYS_DIR,
+                  key_map=config['key_map'],
+                  encrypted_keys=config['encrypted_keys'],
+                  expiration_days=config['expiration_days'],
+                  thresholds=config['thresholds']
+              )
+              
+              # 初始化仓库
+              repo.initialize()
+              print('TUF 仓库初始化成功!')
           
           # 创建应用目录结构
           app_dir = REPO_DIR / 'app'
@@ -170,6 +182,26 @@ jobs:
           print(f'创建应用包: {zip_path}')
           
           # 添加初始版本到仓库（启用补丁创建以支持增量更新）
+          # 先尝试加载现有仓库，如果失败则重新创建
+          try:
+              repo = Repository.from_config()
+              print('成功加载现有 TUF 仓库')
+          except Exception as e:
+              print(f'加载现有 TUF 仓库失败: {e}')
+              print('使用配置重新初始化仓库...')
+              repo = Repository(
+                  app_name=config['app_name'],
+                  repo_dir=REPO_DIR,
+                  keys_dir=KEYS_DIR,
+                  key_map=config['key_map'],
+                  encrypted_keys=config['encrypted_keys'],
+                  expiration_days=config['expiration_days'],
+                  thresholds=config['thresholds']
+              )
+              repo.initialize()
+              print('TUF 仓库重新初始化成功!')
+          
+          # 添加新的 bundle 到仓库
           repo.add_bundle(
               new_bundle_dir=app_dir,
               new_version=CURRENT_VERSION,
@@ -179,7 +211,7 @@ jobs:
           # 发布更改以生成完整的元数据
           repo.publish_changes(private_key_dirs=[KEYS_DIR])
           
-          print('仓库初始化完成!')
+          print('仓库更新完成!')
           "@
 
       # 确保生成版本化的元数据文件
