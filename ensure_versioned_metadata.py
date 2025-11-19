@@ -1,39 +1,17 @@
 #!/usr/bin/env python3
 """
-创建简单的更新包
+确保生成版本化的TUF元数据文件
+此脚本应该在创建更新包后运行，以确保所有版本化的元数据文件都已生成
 """
 
-import tarfile
-import zipfile
-import shutil
-import platform
+import json
 import os
-import sys
+import shutil
 from pathlib import Path
-
-# 将项目根目录添加到Python路径
-sys.path.append(str(Path(__file__).parent))
-
-def create_zip_package(source_dir, output_path):
-    """创建ZIP格式的更新包"""
-    print(f"创建ZIP更新包: {output_path}")
-    with zipfile.ZipFile(output_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
-        for root, dirs, files in os.walk(source_dir):
-            for file in files:
-                file_path = Path(root) / file
-                arc_path = file_path.relative_to(source_dir)
-                zipf.write(file_path, arc_path)
-    print(f"ZIP更新包创建成功: {output_path}")
-
-def create_tar_gz_package(source_dir, output_path):
-    """创建TAR.GZ格式的更新包"""
-    print(f"创建TAR.GZ更新包: {output_path}")
-    with tarfile.open(output_path, "w:gz") as tar:
-        tar.add(source_dir, arcname=".")
-    print(f"TAR.GZ更新包创建成功: {output_path}")
+from tufup.repo import Repository
 
 def ensure_versioned_metadata():
-    """确保生成版本化的TUF元数据文件"""
+    """确保生成版本化的元数据文件"""
     print("=== 确保生成版本化的TUF元数据文件 ===")
     
     # 定义路径
@@ -61,7 +39,6 @@ def ensure_versioned_metadata():
         return False
     
     try:
-        import json
         with open(config_file, 'r') as f:
             config = json.load(f)
         print(f"配置加载成功: {config['app_name']}")
@@ -77,14 +54,12 @@ def ensure_versioned_metadata():
         # 尝试加载现有仓库
         try:
             print("尝试加载现有TUF仓库...")
-            from tufup.repo import Repository
             repo = Repository.from_config()
             print("现有TUF仓库加载成功")
         except Exception as e:
             print(f"现有TUF仓库加载失败: {e}")
             print("使用配置重新初始化仓库...")
             # 创建新的仓库实例
-            from tufup.repo import Repository
             repo = Repository(
                 app_name=config['app_name'],
                 repo_dir=".",
@@ -118,8 +93,6 @@ def ensure_versioned_metadata():
 def create_versioned_files_manually(metadata_dir):
     """手动创建版本化的元数据文件"""
     try:
-        import json
-        import shutil
         # 检查基础文件是否存在
         root_path = metadata_dir / "root.json"
         root1_path = metadata_dir / "1.root.json"
@@ -158,7 +131,6 @@ def create_versioned_files_manually(metadata_dir):
 
 def verify_metadata_files(metadata_dir):
     """验证元数据文件"""
-    import json
     required_files = [
         "root.json",
         "1.root.json",
@@ -184,88 +156,11 @@ def verify_metadata_files(metadata_dir):
         print(f"\n⚠ 以下文件缺失: {missing_files}")
         return False
 
-def create_simple_update():
-    """创建简单的更新包"""
-    print("开始创建简单的更新包...")
-    
-    # 检测当前平台
-    system = platform.system().lower()
-    if system == 'windows':
-        package_format = 'zip'
-        package_extension = '.zip'
-        package_name = "Bomiot-1.1.1.zip"
-    else:
-        package_format = 'tar.gz'
-        package_extension = '.tar.gz'
-        package_name = "Bomiot-1.1.1.tar.gz"
-    
-    print(f"当前平台: {system}, 使用格式: {package_format}")
-    
-    # 创建临时目录
-    temp_dir = Path("temp_app")
-    if temp_dir.exists():
-        shutil.rmtree(temp_dir)
-    temp_dir.mkdir()
-    
-    # 创建targets目录
-    targets_dir = Path("updates/targets")
-    targets_dir.mkdir(parents=True, exist_ok=True)
-    
-    try:
-        # 复制主要文件和目录
-        print("复制应用程序文件...")
-        items_to_copy = [
-            "main",
-            "launcher.py",
-            "requirements.txt"
-        ]
-        
-        for item in items_to_copy:
-            src = Path(item)
-            if src.exists():
-                dst = temp_dir / item
-                if src.is_dir():
-                    shutil.copytree(src, dst)
-                    print(f"  复制目录: {item}")
-                else:
-                    shutil.copy2(src, dst)
-                    print(f"  复制文件: {item}")
-        
-        # 创建更新包
-        package_path = targets_dir / package_name
-        print(f"创建更新包: {package_path}")
-        
-        if package_format == 'zip':
-            create_zip_package(temp_dir, package_path)
-        else:
-            create_tar_gz_package(temp_dir, package_path)
-        
-        print("更新包创建成功!")
-        
-        # 清理临时目录
-        shutil.rmtree(temp_dir)
-        print("临时文件清理完成!")
-        
-        # 确保生成版本化的元数据文件
-        print("\n确保生成版本化的TUF元数据文件...")
-        if ensure_versioned_metadata():
-            print("✓ 版本化元数据文件生成成功!")
-            return True
-        else:
-            print("✗ 版本化元数据文件生成失败!")
-            return False
-        
-    except Exception as e:
-        print(f"创建更新包时出错: {e}")
-        # 清理临时目录
-        if temp_dir.exists():
-            shutil.rmtree(temp_dir)
-        return False
-
 if __name__ == "__main__":
-    success = create_simple_update()
+    success = ensure_versioned_metadata()
     if success:
-        print("\n简单更新包创建成功!")
+        print("\n🎉 版本化元数据文件生成完成!")
+        print("现在应该可以解决2.root.json文件缺失的问题了。")
     else:
-        print("\n简单更新包创建失败!")
-        sys.exit(1)
+        print("\n❌ 版本化元数据文件生成失败!")
+        exit(1)
