@@ -120,13 +120,7 @@ chown -R www-data:www-data /var/www/media/update/
 
 ```
 /media/update/
-├── win/               # Windows平台
-│   ├── metadata/
-│   └── targets/
-├── mac/               # macOS平台
-│   ├── metadata/
-│   └── targets/
-└── linux/             # Linux平台
+└── win/               # Windows平台
     ├── metadata/
     └── targets/
 ```
@@ -137,14 +131,6 @@ chown -R www-data:www-data /var/www/media/update/
 # 部署Windows版本
 scp -r updates_win/metadata/ user@server:/var/www/media/update/win/metadata/
 scp -r updates_win/targets/ user@server:/var/www/media/update/win/targets/
-
-# 部署macOS版本
-scp -r updates_mac/metadata/ user@server:/var/www/media/update/mac/metadata/
-scp -r updates_mac/targets/ user@server:/var/www/media/update/mac/targets/
-
-# 部署Linux版本
-scp -r updates_linux/metadata/ user@server:/var/www/media/update/linux/metadata/
-scp -r updates_linux/targets/ user@server:/var/www/media/update/linux/targets/
 ```
 
 ## 安全最佳实践

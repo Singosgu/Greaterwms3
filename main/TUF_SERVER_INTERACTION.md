@@ -26,12 +26,11 @@ TUF 定义了四种核心元数据类型：
 
 ### GitHub Actions 中的元数据生成
 
-在我们的实现中，GitHub Actions 工作流会为每个平台生成 TUF 元数据：
+在我们的实现中，GitHub Actions 工作流会为Windows平台生成 TUF 元数据：
 
 ```yaml
 # 清理现有的 updates 目录并重新生成
 - name: Clean and Initialize TUF Repository (Windows)
-  if: runner.os == 'Windows'
   run: |
     python -c "
     # ... 代码省略 ...
@@ -56,7 +55,7 @@ updates/
 │   ├── snapshot.json
 │   └── timestamp.json
 └── targets/              # 目标文件（需要部署到服务器）
-    └── Bomiot-1.1.1.tar.gz
+    └── Bomiot-1.1.1.zip
 ```
 
 ## 服务器端部署
@@ -82,7 +81,7 @@ http://3.135.61.8:8008/media/update/
 │   ├── snapshot.json
 │   └── timestamp.json
 └── targets/
-    └── Bomiot-1.1.1.tar.gz
+    └── Bomiot-1.1.1.zip
 ```
 
 ### 3. 客户端访问 URL
@@ -116,7 +115,7 @@ self.client = Client(
 1. **生成新版本目标文件**
    ```bash
    # 创建新版本的应用包
-   tar -czf Bomiot-1.2.0.tar.gz app/
+   zip -r Bomiot-1.2.0.zip app/
    ```
 
 2. **更新 TUF 元数据**
@@ -150,7 +149,7 @@ self.client = Client(
 2. **下载更新**
    ```python
    # 下载目标文件
-   target_info = self.client.get_targetinfo("Bomiot-1.2.0.tar.gz")
+   target_info = self.client.get_targetinfo("Bomiot-1.2.0.zip")
    target_path = self.client.download_target(target_info)
    ```
 

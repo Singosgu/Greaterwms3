@@ -43,18 +43,6 @@ targets.json文件包含类似以下结构的信息：
         "sha256": "abc123..."
       },
       "length": 1234567
-    },
-    "app-mac-1.0.1.dmg": {
-      "hashes": {
-        "sha256": "def456..."
-      },
-      "length": 2345678
-    },
-    "app-linux-1.0.1.deb": {
-      "hashes": {
-        "sha256": "ghi789..."
-      },
-      "length": 3456789
     }
   }
 }
@@ -89,9 +77,7 @@ targets.json文件包含类似以下结构的信息：
 ```json
 {
   "targets": {
-    "myapp-win-1.0.1.exe": { /* Windows版本 */ },
-    "myapp-mac-1.0.1.dmg": { /* macOS版本 */ },
-    "myapp-linux-1.0.1.AppImage": { /* Linux版本 */ }
+    "myapp-win-1.0.1.exe": { /* Windows版本 */ }
   }
 }
 ```
@@ -100,15 +86,13 @@ targets.json文件包含类似以下结构的信息：
 客户端代码会根据运行环境选择合适的文件：
 ```python
 import platform
-current_platform = platform.system().lower()  # 'windows', 'darwin', 'linux'
+current_platform = platform.system().lower()  # 'windows'
 
 # 根据平台选择相应的更新文件
 if current_platform == 'windows':
     target_file = 'myapp-win-1.0.1.exe'
-elif current_platform == 'darwin':  # macOS
-    target_file = 'myapp-mac-1.0.1.dmg'
-elif current_platform == 'linux':
-    target_file = 'myapp-linux-1.0.1.AppImage'
+else:
+    target_file = 'myapp-win-1.0.1.exe'  # 默认为Windows版本
 ```
 
 ## 6. 完整更新流程
@@ -141,13 +125,11 @@ elif current_platform == 'linux':
 ### 8.2 客户端验证
 1. 客户端下载元数据文件并验证签名
 2. 从targets.json中获取可用更新文件列表
-3. 根据当前平台选择合适的更新文件
+3. 从targets.json中获取可用更新文件列表
 4. 下载更新文件并验证其哈希值
 
 ### 8.3 跨平台支持
-我们为不同平台生成不同的更新文件：
+我们为Windows平台生成更新文件：
 - Windows: `.zip` 格式的压缩包
-- macOS: `.tar.gz` 格式的压缩包
-- Linux: `.tar.gz` 格式的压缩包
 
-客户端会根据运行平台自动选择相应的更新文件进行下载和安装。
+客户端会自动选择相应的更新文件进行下载和安装。

@@ -26,10 +26,6 @@ def get_platform_name():
     system = platform.system().lower()
     if system == 'windows':
         return 'windows'
-    elif system == 'darwin':
-        return 'mac'
-    elif system == 'linux':
-        return 'linux'
     else:
         return 'windows'  # 默认为Windows
 

@@ -72,10 +72,8 @@ repo.publish_changes(private_key_dirs=[Path("updates/keys")])
 3. 后续更新使用新的服务器地址
 
 ### 4.2 跨平台URL支持
-不同平台（Windows、macOS、Linux）可以使用不同的更新服务器URL：
+Windows平台可以使用特定的更新服务器URL：
 - Windows: `http://3.135.61.8:8008/media/update/win`
-- macOS: `http://3.135.61.8:8008/media/update/mac`
-- Linux: `http://3.135.61.8:8008/media/update/linux`
 
 ## 5. 部署说明
 

@@ -6,7 +6,6 @@
 import json
 import os
 import shutil
-import tarfile
 import zipfile
 import platform
 import sys
@@ -26,13 +25,6 @@ def create_zip_package(source_dir, output_path):
                 arc_path = file_path.relative_to(source_dir)
                 zipf.write(file_path, arc_path)
     print(f"ZIP更新包创建成功: {output_path}")
-
-def create_tar_gz_package(source_dir, output_path):
-    """创建TAR.GZ格式的更新包"""
-    print(f"创建TAR.GZ更新包: {output_path}")
-    with tarfile.open(output_path, "w:gz") as tar:
-        tar.add(source_dir, arcname=".")
-    print(f"TAR.GZ更新包创建成功: {output_path}")
 
 def ensure_versioned_metadata():
     """确保生成版本化的TUF元数据文件"""
@@ -205,14 +197,10 @@ def create_update_package():
     print(f"应用名称: {app_name}")
     print(f"当前版本: {current_version}")
     
-    # 检测当前平台
+    # 检测当前平台（只支持Windows）
     system = platform.system().lower()
-    if system == 'windows':
-        package_format = 'zip'
-        package_extension = '.zip'
-    else:
-        package_format = 'tar.gz'
-        package_extension = '.tar.gz'
+    package_format = 'zip'
+    package_extension = '.zip'
     
     print(f"当前平台: {system}, 使用格式: {package_format}")
     
@@ -252,8 +240,6 @@ def create_update_package():
         
         if package_format == 'zip':
             create_zip_package(temp_dir, package_path)
-        else:
-            create_tar_gz_package(temp_dir, package_path)
         
         # 清理临时目录
         shutil.rmtree(temp_dir)

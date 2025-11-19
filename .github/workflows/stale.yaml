@@ -11,10 +11,7 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest, macos-latest, ubuntu-22.04]
+    runs-on: windows-latest  # 只保留Windows平台
 
     steps:
       # Check-out repository
@@ -37,7 +34,6 @@ jobs:
 
       # 验证配置文件一致性
       - name: Validate Configuration Consistency (Windows)
-        if: runner.os == 'Windows'
         run: |
           # Windows平台：设置PowerShell编码为UTF-8
           chcp 65001
@@ -75,45 +71,8 @@ jobs:
           print('配置文件一致性检查完成')
           "@
           
-      - name: Validate Configuration Consistency (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          # macOS/Linux平台：设置Python编码环境变量
-          export PYTHONIOENCODING=utf-8
-          
-          python3 -c "
-          import os
-          import json
-          from pathlib import Path
-          
-          # 设置编码环境变量
-          os.environ['PYTHONIOENCODING'] = 'utf-8'
-          
-          # 读取 server_config.json
-          server_config_path = Path('main/server_config.json')
-          if server_config_path.exists():
-              with open(server_config_path, 'r', encoding='utf-8') as f:
-                  server_config = json.load(f)
-                  server_version = server_config.get('current_version', 'unknown')
-                  print(f'server_config.json 版本: {server_version}')
-          
-          # 读取 .tufup-repo-config
-          tufup_config_path = Path('.tufup-repo-config')
-          if tufup_config_path.exists():
-              with open(tufup_config_path, 'r', encoding='utf-8') as f:
-                  tufup_config = json.load(f)
-                  app_name = tufup_config.get('app_name', 'unknown')
-                  print(f'.tufup-repo-config 应用名: {app_name}')
-          
-          # 检查环境变量版本
-          env_version = os.environ.get('BASE_VERSION', 'unknown')
-          print(f'环境变量版本: {env_version}')
-          
-          print('配置文件一致性检查完成')
-          "
       # 清理现有的 updates 目录并重新生成
       - name: Clean and Initialize TUF Repository (Windows)
-        if: runner.os == 'Windows'
         run: |
           # 设置PowerShell编码为UTF-8
           chcp 65001
@@ -223,118 +182,8 @@ jobs:
           print('仓库初始化完成!')
           "@
 
-      - name: Clean and Initialize TUF Repository (macOS/Linux)
-        if: runner.os != 'Windows'
-        run: |
-          # 设置Python编码环境变量
-          export PYTHONIOENCODING=utf-8
-          python3 -c "
-          import os
-          import sys
-          import json
-          import shutil
-          import tarfile
-          from pathlib import Path
-          
-          # 设置编码环境变量
-          os.environ['PYTHONIOENCODING'] = 'utf-8'
-          
-          sys.path.insert(0, str(Path.cwd()))
-          from main.update_config import APP_NAME, CURRENT_VERSION
-          from tufup.repo import Repository
-          
-          # 从 .tufup-repo-config 文件读取配置
-          with open('.tufup-repo-config', 'r') as f:
-              config = json.load(f)
-          
-          # 定义仓库路径
-          REPO_DIR = Path.cwd() / config['repo_dir']
-          KEYS_DIR = REPO_DIR / config['keys_dir'].split('/')[-1]
-          METADATA_DIR = REPO_DIR / 'metadata'
-          TARGETS_DIR = REPO_DIR / 'targets'
-          
-          # 清理现有的目录（如果存在）
-          for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
-              if directory.exists():
-                  shutil.rmtree(directory)
-                  print(f'清理目录: {directory}')
-          
-          # 创建必要的目录
-          for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
-              directory.mkdir(parents=True, exist_ok=True)
-              print(f'创建目录: {directory}')
-          
-          # 创建仓库实例，使用与配置文件一致的参数
-          repo = Repository(
-              app_name=config['app_name'],
-              repo_dir=REPO_DIR,
-              keys_dir=KEYS_DIR,
-              key_map=config['key_map'],
-              encrypted_keys=config['encrypted_keys'],
-              expiration_days=config['expiration_days'],
-              thresholds=config['thresholds']
-          )
-          
-          # 初始化仓库
-          repo.initialize()
-          print('TUF 仓库初始化成功!')
-          
-          # 创建应用目录结构
-          app_dir = REPO_DIR / 'app'
-          app_dir.mkdir(exist_ok=True)
-          
-          # 复制实际的应用文件到app目录
-          # 这里我们创建一个简单的应用包作为示例
-          # 在实际使用中，这里应该包含真正的应用文件
-          files_to_include = [
-              'launcher.py',
-              'main',
-              'setup.ini',
-              'splash.png'
-          ]
-          
-          for item in files_to_include:
-              src = Path.cwd() / item
-              dst = app_dir / item
-              if src.exists():
-                  if src.is_dir():
-                      if dst.exists():
-                          shutil.rmtree(dst)
-                      shutil.copytree(src, dst)
-                      print(f'复制目录: {item}')
-                  else:
-                      shutil.copy2(src, dst)
-                      print(f'复制文件: {item}')
-          
-          # 创建一个简单的tar.gz包作为示例更新文件
-          # 在实际使用中，这里应该创建真正的应用安装包
-          tar_path = app_dir / f'{APP_NAME}-{CURRENT_VERSION}.tar.gz'
-          with tarfile.open(tar_path, 'w:gz') as tar:
-              for root, dirs, files in os.walk(app_dir):
-                  for file in files:
-                      if file != tar_path.name:  # 不包含tar.gz文件本身
-                          file_path = os.path.join(root, file)
-                          arc_path = os.path.relpath(file_path, app_dir)
-                          tar.add(file_path, arcname=arc_path)
-          
-          print(f'创建应用包: {tar_path}')
-          
-          # 添加初始版本到仓库（启用补丁创建以支持增量更新）
-          repo.add_bundle(
-              new_bundle_dir=app_dir,
-              new_version=CURRENT_VERSION,
-              skip_patch=False  # 启用补丁创建以支持增量更新
-          )
-          
-          # 发布更改以生成完整的元数据
-          repo.publish_changes(private_key_dirs=[KEYS_DIR])
-          
-          print('仓库初始化完成!')
-          "
-
       # 验证TUF仓库生成 (Windows)
       - name: Validate TUF Repository (Windows)
-        if: runner.os == 'Windows'
         run: |
           # Windows平台：设置PowerShell编码为UTF-8
           chcp 65001
@@ -402,92 +251,15 @@ jobs:
                   print(f"  {file_path} ({file_size} bytes)")
           '@
 
-      # 验证TUF仓库生成 (Linux/macOS)
-      - name: Validate TUF Repository (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          # macOS/Linux平台：设置Python编码环境变量
-          export PYTHONIOENCODING=utf-8
-          
-          python3 -c '
-          import os
-          import json
-          from pathlib import Path
-          
-          # 设置编码环境变量
-          os.environ["PYTHONIOENCODING"] = "utf-8"
-          
-          # 检查必要的文件是否存在
-          required_files = [
-              "updates/metadata/root.json",
-              "updates/metadata/targets.json",
-              "updates/metadata/snapshot.json",
-              "updates/metadata/timestamp.json"
-          ]
-          
-          missing_files = []
-          for file_path in required_files:
-              if not Path(file_path).exists():
-                  missing_files.append(file_path)
-          
-          if missing_files:
-              print(f"缺少以下文件: {missing_files}")
-              exit(1)
-          else:
-              print("所有必需的TUF仓库文件都已生成")
-              
-          # 检查targets.json是否包含目标文件信息
-          targets_json_path = Path("updates/metadata/targets.json")
-          if targets_json_path.exists():
-              with open(targets_json_path, "r", encoding="utf-8") as f:
-                  targets_data = json.load(f)
-                  targets = targets_data.get("signed", {}).get("targets", {})
-                  if targets:
-                      print(f"targets.json包含以下目标文件: {list(targets.keys())}")
-                      # 检查文件大小和哈希值
-                      for filename, file_info in targets.items():
-                          length_str = "length"
-                          unknown_str = "未知"
-                          hashes_str = "hashes"
-                          print(f"  文件: {filename}")
-                          print(f"    大小: {file_info.get(length_str, unknown_str)}")
-                          hashes_values = list(file_info.get(hashes_str, {}).values())
-                          hash_value = hashes_values[0] if hashes_values else unknown_str
-                          print(f"    哈希: {hash_value}")
-                  else:
-                      print("错误: targets.json不包含目标文件信息")
-                      # 打印完整的targets.json内容用于调试
-                      print("targets.json完整内容:")
-                      print(json.dumps(targets_data, indent=2, ensure_ascii=False))
-                      exit(1)
-          
-          # 列出生成的文件
-          print("\n生成的文件列表:")
-          for root, dirs, files in os.walk("updates"):
-              for file in files:
-                  file_path = os.path.join(root, file)
-                  file_size = os.path.getsize(file_path)
-                  print(f"  {file_path} ({file_size} bytes)")
-          '
       - name: Build Executable with Nuitka (Windows)
-        if: runner.os == 'Windows'
         run: |
           $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
           $env:RUN_MAIN="true"
           $env:PYTHONPATH="$env:PYTHONPATH;."
           $env:PYTHONIOENCODING="utf-8"
           
-      - name: Build Executable with Nuitka (Linux/macOS)
-        if: runner.os != 'Windows'
-        run: |
-          export DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
-          export RUN_MAIN="true"
-          export PYTHONPATH="${{ github.workspace }}:${PYTHONPATH}"
-          export PYTHONIOENCODING="utf-8"
-          
       # Build python script into a single execute or app folder (windows)
       - uses: Nuitka/Nuitka-Action@main
-        if : runner.os == 'Windows'
         with:
           jobs: 16
           nuitka-version: main
@@ -551,138 +323,6 @@ jobs:
           RUN_MAIN: "true"
           PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
 
-      # Build python script into a single execute or app folder (mscos)
-      - uses: Nuitka/Nuitka-Action@main
-        if : runner.os == 'macOS'
-        with:
-          jobs: 16
-          nuitka-version: main
-          script-name: launcher.py
-          mode: standalone
-          company-name: ${{ env.APP_NAME }}
-          product-name: ${{ env.APP_NAME }}
-          file-version: ${{ env.BASE_VERSION }}
-          product-version: ${{ env.BASE_VERSION }}
-          copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
-          macos-app-icon: logo.icns
-          macos-signed-app-name: ${{ env.APP_NAME }}
-          macos-app-name: ${{ env.APP_NAME }}
-          macos-app-version: ${{ env.BASE_VERSION }}
-          enable-plugins: tk-inter
-          # 包含的数据目录
-          include-raw-dir: |
-            main=main
-            updates=updates
-          # 包含的数据文件
-          include-data-files: |
-            setup.ini=setup.ini
-            splash.png=splash.png
-          # 包含的包
-          include-package: |
-            bomiot
-            django
-            orjson
-            uvicorn
-            pandas
-            openpyxl
-            watchdog
-            tomlkit
-            psutil
-            xlsxwriter
-            requests
-            httptools
-            aiofiles
-            starlette
-            bomiot_asgi
-            bomiot_token
-            bomiot_message
-            bomiot_control
-            django_filters
-            rest_framework
-            rest_framework_csv
-            django_apscheduler
-            corsheaders
-            tufup
-            securesystemslib
-            cryptography
-            bsdiff4
-          # 包含的模块
-          include-module: |
-            django.core.management
-          nofollow-import-to: |
-            pandas.tests
-          # 特殊模块参数，用于 Django
-          module-parameter: django-settings-module=bomiot.server.server.settings
-        env:
-          DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
-          RUN_MAIN: "true"
-          PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
-
-      # Build python script into a single execute or app folder (Ubuntu)
-      - uses: Nuitka/Nuitka-Action@main
-        if : runner.os == 'Linux'
-        with:
-          jobs: 16
-          nuitka-version: main
-          script-name: launcher.py
-          mode: standalone
-          company-name: ${{ env.APP_NAME }}
-          product-name: ${{ env.APP_NAME }}
-          file-version: ${{ env.BASE_VERSION }}
-          product-version: ${{ env.BASE_VERSION }}
-          copyright: Copyright (c) 2024 ${{ env.APP_NAME }}
-          linux-icon: logo.png
-          lto: yes
-          enable-plugins: tk-inter
-          # 包含的数据目录
-          include-raw-dir: |
-            main=main
-            updates=updates
-          # 包含的数据文件
-          include-data-files: |
-            setup.ini=setup.ini
-            splash.png=splash.png
-          # 包含的包
-          include-package: |
-            bomiot
-            django
-            orjson
-            uvicorn
-            pandas
-            openpyxl
-            watchdog
-            tomlkit
-            psutil
-            xlsxwriter
-            requests
-            httptools
-            aiofiles
-            starlette
-            bomiot_asgi
-            bomiot_token
-            bomiot_message
-            bomiot_control
-            django_filters
-            rest_framework
-            rest_framework_csv
-            django_apscheduler
-            corsheaders
-            tufup
-            securesystemslib
-            cryptography
-            bsdiff4
-          # 包含的模块
-          include-module: |
-            django.core.management
-          nofollow-import-to: |
-            pandas.tests
-          # 特殊模块参数，用于 Django
-          module-parameter: django-settings-module=bomiot.server.server.settings
-        env:
-          DJANGO_SETTINGS_MODULE: "bomiot.server.server.settings"
-          RUN_MAIN: "true"
-          PYTHONPATH: "${{ github.workspace }};${{ github.workspace }}/bomiot"
-
       # Uploads artifact
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
@@ -690,7 +330,5 @@ jobs:
           name: ${{ env.APP_NAME }}-${{ env.BASE_VERSION }}-${{ runner.os }}
           path: |
             build/*.exe
-            build/*.bin
-            build/*.app/**/*
             build/*.dist/**/*
           include-hidden-files: true

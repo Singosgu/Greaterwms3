@@ -22,7 +22,7 @@
 ```json
 {
   "targets": {
-    "Bomiot-1.1.1.tar.gz": {
+    "Bomiot-1.1.1.zip": {
       "hashes": {
         "sha256": "a199ea78a5dff1f64b0687a9cfd110856b3b1c1458a698257c1019d765752602"
       },
@@ -66,7 +66,7 @@
 在我们的项目中：
 1. 构建时生成包含文件哈希值的targets.json
 2. 客户端下载targets.json并验证签名
-3. 客户端根据平台选择Bomiot-1.1.1.tar.gz文件
+3. 客户端根据平台选择Bomiot-1.1.1.zip文件
 4. 下载文件并验证其哈希值为a199ea78a5dff1f64b0687a9cfd110856b3b1c1458a698257c1019d765752602
 5. 只有哈希值匹配才安装更新
 

@@ -20,16 +20,12 @@ class CrossPlatformUpdater:
     def __init__(self):
         self.system = platform.system().lower()
         self.is_windows = self.system == 'windows'
-        self.is_macos = self.system == 'darwin'
-        self.is_linux = self.system == 'linux'
+        self.is_macos = False  # 移除Mac支持
+        self.is_linux = False  # 移除Linux支持
         
         # 设置平台名称
         if self.is_windows:
             self.platform_name = 'windows'
-        elif self.is_macos:
-            self.platform_name = 'mac'
-        elif self.is_linux:
-            self.platform_name = 'linux'
         else:
             self.platform_name = 'windows'  # 默认为Windows
             
@@ -83,10 +79,6 @@ class CrossPlatformUpdater:
             
             if self.is_windows:
                 return self._restart_windows()
-            elif self.is_macos:
-                return self._restart_macos()
-            elif self.is_linux:
-                return self._restart_linux()
             else:
                 # 默认重启方式
                 return self._restart_default()
@@ -104,33 +96,6 @@ class CrossPlatformUpdater:
             return True
         except Exception as e:
             logger.error(f"Windows平台重启失败: {e}")
-            return False
-    
-    def _restart_macos(self) -> bool:
-        """macOS平台重启"""
-        try:
-            # macOS可能需要特殊处理
-            # 使用osascript来确保应用正确重启
-            script = f'''
-            do shell script "cd '{os.getcwd()}' && exec '{sys.executable}' {' '.join(sys.argv)}"
-            '''
-            subprocess.Popen(['osascript', '-e', script])
-            logger.info("macOS平台重启命令已执行")
-            return True
-        except Exception as e:
-            logger.error(f"macOS平台重启失败: {e}")
-            # 回退到默认方式
-            return self._restart_default()
-    
-    def _restart_linux(self) -> bool:
-        """Linux平台重启"""
-        try:
-            # Linux使用标准的subprocess方式
-            subprocess.Popen([sys.executable] + sys.argv)
-            logger.info("Linux平台重启命令已执行")
-            return True
-        except Exception as e:
-            logger.error(f"Linux平台重启失败: {e}")
             return False
     
     def _restart_default(self) -> bool:
@@ -156,10 +121,6 @@ class CrossPlatformUpdater:
         try:
             if self.is_windows:
                 self._create_windows_scripts(app_dir)
-            elif self.is_macos:
-                self._create_macos_scripts(app_dir)
-            elif self.is_linux:
-                self._create_linux_scripts(app_dir)
             
             logger.info(f"平台特定脚本创建完成 ({self.system})")
             return True
@@ -183,50 +144,10 @@ REM 重启应用程序
         update_script.write_text(update_content, encoding='utf-8')
         logger.info(f"Windows更新脚本已创建: {update_script}")
     
-    def _create_macos_scripts(self, app_dir: Path):
-        """创建macOS脚本"""
-        # 创建Shell脚本用于更新
-        update_script = app_dir / "update.sh"
-        update_content = f'''#!/bin/bash
-# Bomiot macOS 更新脚本
-cd "{app_dir}"
-echo "正在更新应用程序..."
-# 这里可以添加具体的更新命令
-echo "更新完成"
-# 重启应用程序
-exec "{sys.executable}" {" ".join(sys.argv)}
-'''
-        update_script.write_text(update_content, encoding='utf-8')
-        # 设置执行权限
-        update_script.chmod(0o755)
-        logger.info(f"macOS更新脚本已创建: {update_script}")
-    
-    def _create_linux_scripts(self, app_dir: Path):
-        """创建Linux脚本"""
-        # 创建Shell脚本用于更新
-        update_script = app_dir / "update.sh"
-        update_content = f'''#!/bin/bash
-# Bomiot Linux 更新脚本
-cd "{app_dir}"
-echo "正在更新应用程序..."
-# 这里可以添加具体的更新命令
-echo "更新完成"
-# 重启应用程序
-exec "{sys.executable}" {" ".join(sys.argv)}
-'''
-        update_script.write_text(update_content, encoding='utf-8')
-        # 设置执行权限
-        update_script.chmod(0o755)
-        logger.info(f"Linux更新脚本已创建: {update_script}")
-    
     def get_update_file_extension(self) -> str:
         """获取平台特定的更新文件扩展名"""
         if self.is_windows:
             return ".zip"
-        elif self.is_macos:
-            return ".tar.gz"
-        elif self.is_linux:
-            return ".tar.gz"
         else:
             return ".zip"
     
@@ -234,8 +155,6 @@ exec "{sys.executable}" {" ".join(sys.argv)}
         """获取平台特定的临时目录"""
         if self.is_windows:
             return Path(os.environ.get('TEMP', '/tmp'))
-        elif self.is_macos or self.is_linux:
-            return Path('/tmp')
         else:
             return Path('/tmp')
 
