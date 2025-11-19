@@ -178,6 +178,61 @@ jobs:
                   print(f"  {file_path} ({file_size} bytes)")
           '@
 
+      # 创建更新包 (Windows)
+      - name: Create Update Package (Windows)
+        run: |
+          # Windows平台：设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
+          
+          python create_simple_update.py
+
+      # 验证targets目录中的文件 (Windows)
+      - name: Verify Targets Directory (Windows)
+        run: |
+          # Windows平台：设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
+          
+          python -c @"
+          import os
+          from pathlib import Path
+          
+          # 检查targets目录中的文件
+          targets_dir = Path('updates/targets')
+          if targets_dir.exists():
+              print('targets目录中的文件:')
+              for file in targets_dir.iterdir():
+                  if file.is_file():
+                      size = file.stat().st_size
+                      print(f'  {file.name} ({size} bytes)')
+          else:
+              print('错误: targets目录不存在')
+              exit(1)
+          
+          # 检查是否有ZIP文件
+          zip_files = list(targets_dir.glob('*.zip'))
+          if zip_files:
+              print('找到以下ZIP文件:')
+              for zip_file in zip_files:
+                  size = zip_file.stat().st_size
+                  print(f'  {zip_file.name} ({size} bytes)')
+          else:
+              print('警告: targets目录中没有找到ZIP文件')
+          "@
+
+      # 验证targets文件完整性
+      - name: Verify Targets File Integrity
+        run: |
+          # Windows平台：设置PowerShell编码为UTF-8
+          chcp 65001
+          # 设置Python编码环境变量
+          $env:PYTHONIOENCODING="utf-8"
+          
+          python verify_targets_files.py
+
       - name: Build Executable with Nuitka (Windows)
         run: |
           $env:DJANGO_SETTINGS_MODULE="bomiot.server.server.settings"
@@ -205,10 +260,11 @@ jobs:
           include-data-files: |
             setup.ini=setup.ini
             splash.png=splash.png
-          # 包含的数据目录
+          # 包含的数据目录（排除targets目录，避免覆盖）
           include-raw-dir: |
             main=main
-            updates=updates
+            updates/keys=updates/keys
+            updates/metadata=updates/metadata
           # 包含的包
           include-package: |
             bomiot
