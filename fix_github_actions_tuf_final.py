@@ -8,7 +8,6 @@ import os
 import shutil
 import sys
 from pathlib import Path
-from tufup.repo import Repository
 
 def fix_github_actions_tuf():
     """修复 GitHub Actions 中的 TUF 仓库问题"""
@@ -56,21 +55,6 @@ def fix_github_actions_tuf():
         for directory in [REPO_DIR, KEYS_DIR, METADATA_DIR, TARGETS_DIR]:
             directory.mkdir(parents=True, exist_ok=True)
             print(f'创建目录: {directory}')
-        
-        # 创建仓库实例，使用与配置文件一致的参数
-        repo = Repository(
-            app_name=config['app_name'],
-            repo_dir=REPO_DIR,
-            keys_dir=KEYS_DIR,
-            key_map=config['key_map'],
-            encrypted_keys=config['encrypted_keys'],
-            expiration_days=config['expiration_days'],
-            thresholds=config['thresholds']
-        )
-        
-        # 初始化仓库
-        repo.initialize()
-        print('TUF 仓库初始化成功!')
     
     # 清理可能存在的旧目标文件，避免交互式提示
     if TARGETS_DIR.exists():
@@ -97,77 +81,30 @@ def ensure_versioned_metadata():
     
     # 定义仓库路径
     REPO_DIR = Path.cwd() / config['repo_dir']
-    KEYS_DIR = REPO_DIR / config['keys_dir'].split('/')[-1]
     METADATA_DIR = REPO_DIR / 'metadata'
     
-    # 更改当前工作目录到仓库目录
-    original_cwd = os.getcwd()
-    os.chdir(REPO_DIR)
-    
-    try:
-        # 尝试加载现有仓库
-        try:
-            print("尝试加载现有TUF仓库...")
-            repo = Repository.from_config()
-            print("现有TUF仓库加载成功")
-        except Exception as e:
-            print(f"现有TUF仓库加载失败: {e}")
-            print("使用配置重新初始化仓库...")
-            # 创建新的仓库实例
-            repo = Repository(
-                app_name=config['app_name'],
-                repo_dir=".",
-                keys_dir=str(KEYS_DIR.relative_to(REPO_DIR)),
-                key_map=config.get('key_map'),
-                encrypted_keys=config.get('encrypted_keys', []),
-                expiration_days=config.get('expiration_days'),
-                thresholds=config.get('thresholds')
-            )
-            repo.initialize()
-            print("TUF仓库初始化成功")
-        
-        # 发布更改以确保生成版本化的元数据文件
-        print("发布TUF仓库更改以生成版本化元数据文件...")
-        try:
-            repo.publish_changes(private_key_dirs=[str(KEYS_DIR.absolute())])
-            print("✓ TUF仓库更改发布成功，版本化元数据文件已生成")
-        except Exception as e:
-            print(f"✗ TUF仓库更改发布失败: {e}")
-            # 如果发布失败，尝试手动创建版本化的文件
-            print("尝试手动创建版本化元数据文件...")
-            return create_versioned_files_manually(METADATA_DIR)
-        
-        # 验证生成的元数据文件
-        print("验证生成的元数据文件...")
-        return verify_metadata_files(METADATA_DIR)
-            
-    finally:
-        # 恢复原来的工作目录
-        os.chdir(original_cwd)
-
-def create_versioned_files_manually(metadata_dir):
-    """手动创建版本化的元数据文件"""
+    # 手动创建版本化的元数据文件，完全避免使用 tufup 库可能的交互式提示
     try:
         # 检查基础文件是否存在
-        root_path = metadata_dir / "root.json"
-        root1_path = metadata_dir / "1.root.json"
+        root_path = METADATA_DIR / "root.json"
         
         if not root_path.exists():
             print("✗ 缺少基础文件: root.json")
             return False
         
         # 如果1.root.json不存在，复制root.json为1.root.json
+        root1_path = METADATA_DIR / "1.root.json"
         if not root1_path.exists():
             print("创建1.root.json文件...")
             shutil.copy(root_path, root1_path)
             print("✓ 1.root.json文件创建成功")
         
         # 创建2.root.json文件
-        root2_path = metadata_dir / "2.root.json"
+        root2_path = METADATA_DIR / "2.root.json"
         if not root2_path.exists():
             print("创建2.root.json文件...")
-            # 读取1.root.json内容
-            with open(root1_path, 'r') as f:
+            # 读取root.json内容
+            with open(root_path, 'r') as f:
                 root_data = json.load(f)
             
             # 更新版本号
@@ -179,9 +116,13 @@ def create_versioned_files_manually(metadata_dir):
             
             print("✓ 2.root.json文件创建成功")
         
-        return True
+        # 验证生成的元数据文件
+        return verify_metadata_files(METADATA_DIR)
+            
     except Exception as e:
-        print(f"手动创建版本化文件时出错: {e}")
+        print(f"创建版本化文件时出错: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def verify_metadata_files(metadata_dir):
